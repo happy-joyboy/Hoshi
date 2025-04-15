@@ -1,298 +1,296 @@
-.include "data_pq.asm"
+    .include    "data_pq.asm"
 .text
-# === PUSH aka (INSERT) ===
-# arguments: 
-# $a0: x-coordinate (int)
-# $a1: y-coordinate (int)
-# $a2: fScore (int)
-# Push function: Inserts a node into the heap
-# Arguments: $a0 = x, $a1 = y, $a2 = fScore
+
 push:
-    # Load heap size and capacity
-    la $t0, heapSize
-    lw $t1, 0($t0)      # t1 = heapSize
-    la $t2, heap_capacity
-    lw $t3, 0($t2)      # t3 = heap_capacity
+    la      $t0,                heapSize
+    lw      $t1,                0($t0)
+    la      $t2,                heap_capacity
+    lw      $t3,                0($t2)
+    bge     $t1,                $t3,                push_full
 
-    # Check if the heap is full
-    bge $t1, $t3, push_full
+    la      $t4,                heap
+    sll     $t5,                $t1,                4
+    add     $t4,                $t4,                $t5
+    sw      $a0,                0($t4)
+    sw      $a1,                4($t4)
+    sw      $a2,                8($t4)
+    sw      $a3,                12($t4)
 
-    # Calculate the address to insert the new node
-    la $t4, heap
-    mul $t5, $t1, 12     # t5 = heapSize * 12 (size of each node)
-    add $t4, $t4, $t5    # t4 = heap + (heapSize * 12)
+    addi    $t1,                $t1,                1
+    sw      $t1,                0($t0)
+    addi    $t3,                $t1,                -1
+    j       bubble_up
 
-    # Insert the node (x, y, fScore)
-    sw $a0, 0($t4)       # Store x
-    sw $a1, 4($t4)       # Store y
-    sw $a2, 8($t4)       # Store fScore
-
-    # Increment heap size
-    addi $t1, $t1, 1
-    sw $t1, 0($t0)
-
-    # Initialize current index for bubble_up
-    subi $t3, $t1, 1     # current_idx = heap_size - 1
-
-# Bubble up function: Restores the heap property after insertion
-# Uses $t3 as current_idx
 bubble_up:
-    beq $t3, $zero, bubble_up_end # If current_idx == 0 (root node), stop
+    beq     $t3,                $zero,              bubble_up_end
+    addi    $t4,                $t3,                -1
+    srl     $t4,                $t4,                1
+    la      $t5,                heap
+    sll     $t6,                $t4,                4
+    add     $t5,                $t5,                $t6
+    lw      $t7,                12($t5)
+    la      $t8,                heap
+    sll     $t9,                $t3,                4
+    add     $t8,                $t8,                $t9
+    lw      $t0,                12($t8)
+    bge     $t0,                $t7,                bubble_up_end
 
-    # Calculate parent index (parent_idx = (current_idx - 1) / 2)
-    subi $t4, $t3, 1     # t4 = current_idx - 1
-    srl $t4, $t4, 1      # t4 = parent_idx (divide by 2)
+    # Swap using $t registers
+    lw      $t0,                0($t5)
+    lw      $t1,                0($t8)
+    sw      $t0,                0($t8)
+    sw      $t1,                0($t5)
+    lw      $t0,                4($t5)
+    lw      $t1,                4($t8)
+    sw      $t0,                4($t8)
+    sw      $t1,                4($t5)
+    lw      $t0,                8($t5)
+    lw      $t1,                8($t8)
+    sw      $t0,                8($t8)
+    sw      $t1,                8($t5)
+    lw      $t0,                12($t5)
+    lw      $t1,                12($t8)
+    sw      $t0,                12($t8)
+    sw      $t1,                12($t5)
 
-    # Load fScore of parent node
-    la $t5, heap
-    mul $t6, $t4, 12     # t6 = parent_idx * 12
-    add $t5, $t5, $t6    # t5 = heap + (parent_idx * 12)
-    lw $t7, 8($t5)       # t7 = parent.fScore
-
-    # Load fScore of current node
-    la $t8, heap
-    mul $t9, $t3, 12     # t9 = current_idx * 12
-    add $t8, $t8, $t9    # t8 = heap + (current_idx * 12)
-    lw $t0, 8($t8)       # t0 = current.fScore
-
-    # Compare fScores
-    bge $t0, $t7, bubble_up_end # If current.fScore >= parent.fScore, stop
-
-    # Swap current node and parent node
-    lw $t0, 0($t5)       # Load parent.x
-    lw $t1, 4($t5)       # Load parent.y
-    lw $t2, 8($t5)       # Load parent.fScore
-
-    lw $t6, 0($t8)       # Load current.x
-    lw $t7, 4($t8)       # Load current.y
-    lw $t9, 8($t8)       # Load current.fScore
-
-    sw $t0, 0($t8)       # Store parent.x in current
-    sw $t1, 4($t8)       # Store parent.y in current
-    sw $t2, 8($t8)       # Store parent.fScore in current
-    sw $t6, 0($t5)       # Store current.x in parent
-    sw $t7, 4($t5)       # Store current.y in parent
-    sw $t9, 8($t5)       # Store current.fScore in parent
-
-    # Update current index to parent index
-    move $t3, $t4        # current_idx = parent_idx
-    j bubble_up          # Repeat the process
+    move    $t3,                $t4
+    j       bubble_up
 
 bubble_up_end:
-    jr $ra               # Return
+    jr      $ra
 
-
-# === POP (EXTRACT MIN) ===
-# returns the node with the minimum fScore (root of the heap) and removes it from the heap
-# Argument: $a0 = address to store {x, y, fScore}
 pop:
-    #check if heap is empty
-    lw  $t0, heapSize # load current size of heap
-    beq $t0, $zero, pop_failed # if heap is empty you cant extract anything DUh
+    la      $t0,                heapSize
+    lw      $t1,                0($t0)
+    beqz    $t1,                pop_failed
 
-   # Save root node (min element)
-    la   $t1, heap
-    lw   $t2, 0($t1)        # x
-    lw   $t3, 4($t1)        # y
-    lw   $t4, 8($t1)        # fScore
+    la      $t2,                heap
+    lw      $t3,                0($t2)
+    lw      $t4,                4($t2)
+    lw      $t5,                8($t2)
+    lw      $t6,                12($t2)
+    la      $t7,                extracted_node
+    sw      $t3,                0($t7)
+    sw      $t4,                4($t7)
+    sw      $t5,                8($t7)
+    sw      $t6,                12($t7)
 
-    la  $t5, extracted_node
-    # Store values into the provided struct
-    sw   $t2, 0($t5)        # x
-    sw   $t3, 4($t5)        # y
-    sw   $t4, 8($t5)        # fScore
+    addi    $t1,                $t1,                -1
+    sw      $t1,                0($t0)
+    beqz    $t1,                pop_end
 
-    # decrease heap size & check if heap is empty
-    subi $t0, $t0, 1 
-    sw   $t0, heapSize 
-    beq  $t0, $zero, pop_end   # Heap is now empty if true
-
-    # Load last node
-    mul  $t5, $t0, 12
-    add  $t5, $t1, $t5           # Last node address
-    lw   $t6, 0($t5)             # last.x
-    lw   $t7, 4($t5)             # last.y
-    lw   $t8, 8($t5)             # last.fScore
-
-    sw   $t6, 0($t1)             # Update root node with last node
-    sw   $t7, 4($t1)
-    sw   $t8, 8($t1)
-
-    # Bubble down the new root node to restore our lovely heap property (the damn thing is broken so i need yo maintain order ...)
-    li   $t3, 0  # set current_idx = 0
+    la      $t2,                heap
+    sll     $t3,                $t1,                4
+    add     $t4,                $t2,                $t3
+    lw      $t7,                0($t4)
+    lw      $t8,                4($t4)
+    lw      $t9,                8($t4)
+    lw      $t0,                12($t4)
+    sw      $t7,                0($t2)
+    sw      $t8,                4($t2)
+    sw      $t9,                8($t2)
+    sw      $t0,                12($t2)
+    li      $t3,                0
+    j       bubble_down
 
 bubble_down:
-    # Calculate left/right child indices
-    sll  $t4, $t3, 1        # 2 * current_idx
-    addi $t4, $t4, 1        # left_child = 2*current_idx + 1
-    addi $t5, $t4, 1        # right_child = 2*current_idx + 2
+    sll     $t4,                $t3,                1
+    addi    $t5,                $t4,                1
+    addi    $t6,                $t4,                2
+    move    $t7,                $t3                                 # Candidate index
 
-    # Assume current is smallest
-    move $t6, $t3           # smallest_idx = current_idx
+    la      $t8,                heapSize
+    lw      $t9,                0($t8)
+    bgt     $t5,                $t9,                pop_end
+    bgt     $t6,                $t9,                pop_end
+    la      $t0,                heap
+    sll     $t1,                $t5,                4
+    add     $t0,                $t0,                $t1
+    lw      $t2,                12($t0)                             # Left child fScore
+    la      $t0,                heap
+    sll     $t1,                $t6,                4
+    add     $t0,                $t0,                $t1
+    lw      $t3,                12($t0)                             # Right child fScore
+    blt     $t2,                $t3,                check_left
+    la      $t0,                heap
+    sll     $t7,                $t7,                4
+    add     $t7,                $t0,                $t7
+    lw      $t2,                12($t7)                             # node fScore
+    blt     $t2,                $t3,                pop_end
+    # Swap using $t registers
+    sll     $t6,                $t6,                4
+    add     $t6,                $t0,                $t6
+    lw      $t0,                0($t6)
+    lw      $t1,                0($t7)
+    sw      $t0,                0($t7)
+    sw      $t1,                0($t6)
+    lw      $t0,                4($t6)
+    lw      $t1,                4($t7)
+    sw      $t0,                4($t7)
+    sw      $t1,                4($t6)
+    lw      $t0,                8($t6)
+    lw      $t1,                8($t7)
+    sw      $t0,                8($t7)
+    sw      $t1,                8($t6)
+    lw      $t0,                12($t6)
+    lw      $t1,                12($t7)
+    sw      $t0,                12($t7)
+    sw      $t1,                12($t6)
 
-    
-   # Compare with left child
-    bge  $t4, $t0, check_right
-    la   $t7, heap
-    mul  $t8, $t4, 12
-    add  $t7, $t7, $t8
-    lw   $t9, 8($t7)        # left_child.fScore
-    la   $t8, heap
-    mul  $t2, $t6, 12
-    add  $t8, $t8, $t2
-    lw   $t2, 8($t8)        # smallest.fScore
-    bge  $t9, $t2, check_right
-    move $t6, $t4           # smallest_idx = left_child
 
-check_right:
-    # Compare with right child
-    bge  $t5, $t0, compare_smallest
-    la   $t7, heap
-    mul  $t8, $t5, 12
-    add  $t7, $t7, $t8
-    lw   $t9, 8($t7)        # right_child.fScore
-    la   $t8, heap
-    mul  $t2, $t6, 12
-    add  $t8, $t8, $t2
-    lw   $t2, 8($t8)        # smallest.fScore
-    bge  $t9, $t2, compare_smallest
-    move $t6, $t5           # smallest_idx = right_child
+check_left:
+    la      $t0,                heap
+    sll     $t7,                $t7,                4
+    add     $t7,                $t0,                $t7
+    lw      $t3,                12($t7)                             # node fScore
+    blt     $t3,                $t2,                pop_end
+    # Swap using $t registers
+    sll     $t5,                $t5,                4
+    add     $t5,                $t0,                $t5
+    lw      $t0,                0($t5)
+    lw      $t1,                0($t7)
+    sw      $t0,                0($t7)
+    sw      $t1,                0($t5)
+    lw      $t0,                4($t5)
+    lw      $t1,                4($t7)
+    sw      $t0,                4($t7)
+    sw      $t1,                4($t5)
+    lw      $t0,                8($t5)
+    lw      $t1,                8($t7)
+    sw      $t0,                8($t7)
+    sw      $t1,                8($t5)
+    lw      $t0,                12($t5)
+    lw      $t1,                12($t7)
+    sw      $t0,                12($t7)
+    sw      $t1,                12($t5)
 
-compare_smallest:
-    # Swap if needed
-    beq  $t6, $t3, pop_end
-    # Swap current and smallest child
-    la   $t7, heap
-    mul  $t8, $t3, 12       # current address
-    add  $t8, $t7, $t8
-    mul  $t9, $t6, 12       # smallest address
-    add  $t9, $t7, $t9
-
-    # Swap x, y, fScore
-    lw   $t0, 0($t8)
-    lw   $t1, 4($t8)
-    lw   $t2, 8($t8)
-    lw   $t3, 0($t9)
-    lw   $t4, 4($t9)
-    lw   $t5, 8($t9)
-    sw   $t3, 0($t8)
-    sw   $t4, 4($t8)
-    sw   $t5, 8($t8)
-    sw   $t0, 0($t9)
-    sw   $t1, 4($t9)
-    sw   $t2, 8($t9)
-
-    # Update current index
-    move $t3, $t6
-    j    bubble_down
+pop_end:
+    jr      $ra
 
 pop_failed:
-    # If heap is empty, return -1 for x, y, and fScore
-    li   $t2, -1                # Error: x = -1
-    sw   $t2, 0($a0)
-    sw   $t2, 4($a0)            # y = -1
-    sw   $t2, 8($a0)            # fScore = -1
-pop_end:
-    jr   $ra
-    
+    li      $t0,                -1
+    sw      $t0,                0($a0)
+    sw      $t0,                4($a0)
+    sw      $t0,                8($a0)
+    sw      $t0,                12($a0)
+    jr      $ra
+
+    # Printing routines remain unchanged but ensure no saved registers are used.
+
 push_full:
     # Print "Heap is full" message
-    la $a0, msg_heap_full
-    li $v0, 4            # Print string syscall
+    la      $a0,                msg_heap_full
+    li      $v0,                4                                   # Print string syscall
     syscall
-    jr $ra  
+    jr      $ra
 
-print_heap_empty:
-    la $a0, msg_heap_empty
-    li $v0, 4            # Print string syscall
-    syscall
-    jr $ra
+    # === PRINTING ROUTINES ===
 
 print_heap:
-    la $t0, heapSize
-    lw $t1, 0($t0)       # t1 = heapSize
-    la $t2, heap         # t2 = heap base address
+    # Load heapSize and base address of heap
+    la      $t0,                heapSize
+    lw      $t1,                0($t0)                              # t1 = heapSize
+    la      $t2,                heap
 
-    beqz $t1, print_heap_empty # If heapSize == 0, print empty message
+    beqz    $t1,                print_heap_empty                    # If heapSize == 0, print empty message
 
-    # Loop through the heap and print each node
-    li $t3, 0            # t3 = index
+    li      $t3,                0                                   # index = 0
 print_heap_loop:
-    bge $t3, $t1, print_heap_end # Exit loop if index >= heapSize
+    bge     $t3,                $t1,                print_heap_end  # Exit loop when index >= heapSize
+    # Calculate node address: index * 16
+    mul     $t4,                $t3,                16
+    add     $t5,                $t2,                $t4
 
-    # Calculate the address of the current node
-    mul $t4, $t3, 12     # t4 = index * 12
-    add $t5, $t2, $t4    # t5 = heap + (index * 12)
-   
-    # Load and print x
-    lw $a0, 0($t5)       # Load x
-    li $v0, 1            # Print integer syscall
+    # Print x at offset 0
+    lw      $a0,                0($t5)
+    li      $v0,                1                                   # Print integer syscall
     syscall
 
-    # Print a comma and space
-    la $a0, message_coma
-    li $v0, 4            # Print string syscall
+    # Print comma and space
+    la      $a0,                message_coma
+    li      $v0,                4
     syscall
 
-    # Load and print y
-    lw $a0, 4($t5)       # Load y
-    li $v0, 1            # Print integer syscall
+    # Print y at offset 4
+    lw      $a0,                4($t5)
+    li      $v0,                1
     syscall
 
-    # Print a comma and space
-    la $a0, message_coma
-    li $v0, 4            # Print string syscall
+    # Print comma and space
+    la      $a0,                message_coma
+    li      $v0,                4
     syscall
 
-    # Load and print fScore
-    lw $a0, 8($t5)       # Load fScore
-    li $v0, 1            # Print integer syscall
+    # Print parent at offset 8
+    lw      $a0,                8($t5)
+    li      $v0,                1
+    syscall
+
+    # Print comma and space
+    la      $a0,                message_coma
+    li      $v0,                4
+    syscall
+
+    # Print fScore at offset 12
+    lw      $a0,                12($t5)
+    li      $v0,                1
     syscall
 
     # Print a newline
-    la $a0, newline
-    li $v0, 4            # Print string syscall
+    la      $a0,                newline
+    li      $v0,                4
     syscall
 
-    # Increment index
-    addi $t3, $t3, 1
-    j print_heap_loop
-
+    # Increment index and loop
+    addi    $t3,                $t3,                1
+    j       print_heap_loop
 print_heap_end:
-    jr $ra
+    jr      $ra
+
+print_heap_empty:
+    la      $a0,                msg_heap_empty
+    li      $v0,                4
+    syscall
+    jr      $ra
 
 print_EX_node:
-
-    la $t0, extracted_node # Load address of extracted node
+    la      $t0,                extracted_node                      # Extracted node structure (16 bytes)
 
     # Print x
-    lw $a0, 0($t0)     # Load x
-    li $v0, 1          # Print integer syscall
+    lw      $a0,                0($t0)
+    li      $v0,                1
     syscall
 
-    # Print a comma and space
-    la $a0, message_coma
-    li $v0, 4          # Print string syscall
+    la      $a0,                message_coma
+    li      $v0,                4
     syscall
 
     # Print y
-    lw $a0, 4($t0)     # Load y
-    li $v0, 1          # Print integer syscall
+    lw      $a0,                4($t0)
+    li      $v0,                1
     syscall
 
-    # Print a comma and space
-    la $a0, message_coma
-    li $v0, 4          # Print string syscall
+    la      $a0,                message_coma
+    li      $v0,                4
+    syscall
+
+    # Print parent
+    lw      $a0,                8($t0)
+    li      $v0,                1
+    syscall
+
+    la      $a0,                message_coma
+    li      $v0,                4
     syscall
 
     # Print fScore
-    lw $a0, 8($t0)     # Load fScore
-    li $v0, 1          # Print integer syscall
+    lw      $a0,                12($t0)
+    li      $v0,                1
     syscall
 
-    # Print a newline
-    la $a0, newline
-    li $v0, 4          # Print string syscall
+    # Newline
+    la      $a0,                newline
+    li      $v0,                4
     syscall
 
-    jr $ra
+    jr      $ra
