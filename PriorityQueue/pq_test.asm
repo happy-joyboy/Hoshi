@@ -37,9 +37,13 @@ insert_loop:
     jal print_EX_node
 
 
+    jal print_heap
+
     # Exit
     li $v0, 10
     syscall
+
+
 
 
 .include "pq.asm" 
