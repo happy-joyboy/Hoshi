@@ -52,10 +52,4 @@ insert_loop:
     syscall
 
 
-<<<<<<< HEAD
-
-
-.include "pq.asm" 
-=======
             .include    "pq.asm"
->>>>>>> c7106095367a4088ed5de2e2b0c5be503113824d
