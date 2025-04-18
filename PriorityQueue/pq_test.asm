@@ -31,8 +31,8 @@ insert_loop:
 
 
     jal     pop
-    jal     pop
-    jal     pop
+    # jal     pop
+    # jal     pop
 
 
 
@@ -43,8 +43,6 @@ insert_loop:
     jal     print_EX_node
 
 
-    jal     print_heap
-
     jal print_heap
 
     # Exit
@@ -52,4 +50,4 @@ insert_loop:
     syscall
 
 
-            .include    "pq.asm"
+            .include    "new_pq.asm"

@@ -11,14 +11,14 @@
 heap: .space 2000        # 100-node heap (20 bytes per node)
 heapSize: .word 0        # Current number of nodes in the heap
 heap_capacity: .word 100 # Maximum number of nodes in the heap
-extracted_node: .space 20 # Space for extracted node
+                                  # 4B x + 4B y + 4B parent + 4B fScore
+extracted_node: .space 20 # 4B x + 4B y + 4B g + 4B h + 4B parent_idx
 
 # Messages
-msg_heap_full: .asciiz "Heap is full. Cannot insert.\n"
+msg_heap_full:  .asciiz "Heap is full. Cannot insert.\n"
 msg_heap_empty: .asciiz "Heap is empty.\n"
-msg_extract: .asciiz "Extracted node: "
-message_coma: .asciiz ", "
-newline: .asciiz "\n"
+msg_extract:    .asciiz "Extracted node: "
+message_coma:   .asciiz ", "
 
 .text
 # === PUSH (INSERT) ===
