@@ -17,7 +17,7 @@ start_y:        .word   0
 goal_x:         .word   2
 goal_y:         .word   2
 
-nodes:          .space  324                                 # 9 nodes Ã— 36 bytes
+nodes:          .space  324                                 # 9 nodes × 36 bytes
 node_size:      .word   36                                  # Size of each node (36 bytes)
 nodes_count:    .word   0                                   # Number of nodes created
     # Offsets for fields within the node structure
@@ -36,16 +36,17 @@ comma:          .asciiz ","
 wall_str:       .asciiz "] Wall: "
 newline:        .asciiz "\n"
 
+# Add to existing strings
+hscore_str:    .asciiz " hScore: "
+
 .text
+.globl main
 
 main:
-
-    jal     initialize_nodes                                # Create node grid from map
-    jal     print_node_grid     
-    
-                                # Verification print
-
-    li      $v0,                10                          # Exit
+    jal initialize_nodes
+    jal calculate_all_heuristics  # New function to apply heuristic
+    jal print_node_grid_with_h     # Modified print function
+    li $v0, 10
     syscall
 
 initialize_nodes:
@@ -53,6 +54,12 @@ initialize_nodes:
     la      $s1,                map_data                    # Map data pointer
     lw      $s2,                map_width                   # Grid dimensions
     lw      $s3,                map_height
+
+    # lw $t0, nodes                   # Load base address of nodes
+    # lw $t5, map_data
+
+    # lw $t0, map_height               # Load map height
+    # lw $t1, map_width                # Load map width
 
     li      $s4,                0                           # Row counter (y)
 row_loop:
@@ -71,7 +78,7 @@ col_loop:
     mul     $t2,                $s4,            $s2
     add     $t2,                $t2,            $s5
     lw      $t3,                node_size
-    mul     $t2,                $t2,            $t3         # Ã— node_size
+    mul     $t2,                $t2,            $t3         # × node_size
     add     $t3,                $s0,            $t2         # t4 = base + (row * map_width + col) * node_size -> node address
 
     # Store coordinates
@@ -164,47 +171,131 @@ print_end:
     jr      $ra
 
 
-# Inputs:
-#   $a0 = x (column index)
-#   $a1 = y (row index)
-#   $a2 = value (new gScore)
-set_g_score:
-    # Calculate the index of the node in the nodes array
-    lw $t0, map_width         # Load map width
-    mul $t1, $a1, $t0         # t1 = y * width
-    add $t1, $t1, $a0         # t1 = y * width + x
+# New function: Calculate heuristics for all nodes
+calculate_all_heuristics:
+    # Find goal node
+    lw $a0, goal_x
+    lw $a1, goal_y
+    jal find_node
+    move $s6, $v0  # Store goal node address in $s6
 
-    # Calculate the address of the node
-    lw $t2, node_size         # Load size of each node
-    mul $t3, $t1, $t2         # t3 = (y * width + x) * node_size
-    la $t4, nodes             # Base address of nodes array
-    add $t4, $t4, $t3         # t4 = &nodes[y * width + x]
+    # Loop through all nodes
+    la $s0, nodes
+    lw $s1, nodes_count
+    li $s2, 0
 
-    # Update the gScore field of the node
-    sw $a2, gScore($t4)       # Store the new gScore value at the gScore offset
+    heuristic_loop:
+        bge $s2, $s1, heuristic_done
+        
+        # Get current node address
+        lw $t0, node_size
+        mul $t1, $s2, $t0
+        add $a0, $s0, $t1  # Current node address
+        
+        # Calculate heuristic
+        move $a1, $s6       # Goal node address
+        jal manhattan_heuristic
+        
+        # Store result in node
+        sw $v0, hScore($a0)
+        
+        addi $s2, $s2, 1
+        j heuristic_loop
 
-    jr $ra                    # Return to caller
+heuristic_done:
+    jr $ra
 
-# Inputs:
-#   $a0 = x (column index)
-#   $a1 = y (row index)
-# Returns:
-#   $v0 = gScore (or -1 if not set)
-get_g_score:
-    # Calculate the index of the node in the nodes array
-    lw $t0, map_width         # Load map width
-    mul $t1, $a1, $t0         # t1 = y * width
-    add $t1, $t1, $a0         # t1 = y * width + x
+# Helper function to find node by coordinates
+# Input: $a0 = x, $a1 = y
+# Output: $v0 = node address
+find_node:
+    la $t0, nodes
+    lw $t1, nodes_count
+    li $t2, 0
 
-    # Calculate the address of the node
-    lw $t2, node_size         # Load size of each node
-    mul $t3, $t1, $t2         # t3 = (y * width + x) * node_size
-    la $t4, nodes             # Base address of nodes array
-    add $t4, $t4, $t3         # t4 = &nodes[y * width + x]
+    find_loop:
+        bge $t2, $t1, not_found
+        
+        lw $t3, node_size
+        mul $t4, $t2, $t3
+        add $t5, $t0, $t4
+        
+        lw $t6, x($t5)
+        lw $t7, y($t5)
+        
+        beq $t6, $a0, check_y
+        j next_node
+        
+    check_y:
+        beq $t7, $a1, found_node
+        
+    next_node:
+        addi $t2, $t2, 1
+        j find_loop
+        
+    found_node:
+        move $v0, $t5
+        jr $ra
+        
+    not_found:
+        li $v0, 0
+        jr $ra
 
-    # Retrieve the gScore field of the node
-    lw $v0, gScore($t4)       # Load the gScore value from the gScore offset
+# Modified print function to show hScores
+print_node_grid_with_h:
+    la $t0, nodes
+    lw $t1, nodes_count
+    li $t2, 0
 
-    jr $ra                    # Return to caller
+    print_loop_h:
+        bge $t2, $t1, print_end_h
 
-.include "D:\Pro lang stuf\mips\project\a star\Hoshi\PriorityQueue\pq.asm"
+        lw $t3, node_size
+        mul $t4, $t2, $t3
+        add $t5, $t0, $t4
+
+        # Print coordinates and wall status
+        li $v0, 4
+        la $a0, node_str
+        syscall
+
+        li $v0, 1
+        lw $a0, x($t5)
+        syscall
+
+        li $v0, 4
+        la $a0, comma
+        syscall
+
+        li $v0, 1
+        lw $a0, y($t5)
+        syscall
+
+        li $v0, 4
+        la $a0, wall_str
+        syscall
+
+        li $v0, 1
+        lw $a0, wall($t5)
+        syscall
+
+        # Print hScore
+        li $v0, 4
+        la $a0, hscore_str
+        syscall
+
+        li $v0, 1
+        lw $a0, hScore($t5)
+        syscall
+
+        li $v0, 4
+        la $a0, newline
+        syscall
+
+        addi $t2, $t2, 1
+        j print_loop_h
+
+print_end_h:
+    jr $ra
+
+.include "h_calc.asm"
