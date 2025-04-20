@@ -207,4 +207,4 @@ get_g_score:
 
     jr $ra                    # Return to caller
 
-.include "D:\Pro lang stuf\mips\project\a star\Hoshi\PriorityQueue\pq.asm"
+.include "PriorityQueue\pq.asm"

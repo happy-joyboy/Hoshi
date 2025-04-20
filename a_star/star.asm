@@ -265,5 +265,5 @@ add_to_closed_set:
     jr $ra
 
 
-.include "D:\Pro lang stuf\mips\project\a star\Hoshi\node\Node_list.asm"
-.include "D:\Pro lang stuf\mips\project\a star\Hoshi\func_calc\h_calc.asm"
+.include "node\Node_list.asm"
+.include "func_calc\h_calc.asm"
