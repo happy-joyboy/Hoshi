@@ -2,8 +2,8 @@
 str_space:      .asciiz " "
 str_newline:    .asciiz "\n"
 
-nodes:          .space  324                                 # 9 nodes × 36 bytes
-node_size:      .word   36                                  # Size of each node (36 bytes)
+nodes:          .space  3200                                 # 9 nodes × 36 bytes
+node_size:      .word   32                                    # Size of each node (36 bytes)
 nodes_count:    .word   0                                   # Number of nodes created
     # Offsets for fields within the node structure
                 .eqv    x, 0
