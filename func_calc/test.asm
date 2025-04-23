@@ -9,9 +9,12 @@
                 .eqv    parent_x, 24
                 .eqv    parent_y, 28
 
+node_sizes:    .word 32
 # Add to existing strings
 hscore_str:    .asciiz " hScore: "
-str_count:    .asciiz "Total Nodes: "
+str_count:    .asciiz "\nTotal Nodes: "
+str_manhattan: .asciiz "\nManhattan Heuristic: "
+str_euclidean: .asciiz "\nEuclidean Heuristic: "
 
 .text
 .globl main
@@ -26,29 +29,29 @@ main:
 # New function: Calculate heuristics for all nodes
 calculate_all_heuristics:
 
-    # Loop through all nodes
     la $s0, nodes
     lw $s1, nodes_count
-    li $s2, 0
+    li $s2, 0 # Node index
+    lw $s3, node_size
 
     heuristic_loop:
+    
         bge $s2, $s1, heuristic_done
+
+        #load address of current node
+        mul $t0, $s2, $s3
+        add $t5, $s0, $t0
         
-        # Get current node address
-        lw $t0, node_size
-        mul $t1, $s2, $t0
-        add $a0, $s0, $t1  # Current node address
-        
-        # Calculate heuristic
-        move $a1, $s6       # Goal node address
+        # Load coordinates
+        lw $a0, x($t1) # x coordinate
+        lw $a1, y($t1) # y coordinate
+        lw $a2, goal_x # goal x
+        lw $a3, goal_y # goal y
+        # Calculate Manhattan heuristic
         jal manhattan_heuristic
-        
-        # Store result in node
-        li $s4, 0
-        addi $s4, $v0, 0
-        sw $s4, hScore($a0)
-        
-        addi $s2, $s2, 1
+        sw $v0, hScore($t1) # Store heuristic in node
+
+        addi $s2, $s2, 1 # Increment node index
         j heuristic_loop
 
 heuristic_done:
@@ -56,8 +59,8 @@ heuristic_done:
 
 # Modified print function to show hScores
 print_node_grid_with_h:
-    la $t0, nodes
-    lw $t1, nodes_count
+    la $s0, nodes
+    lw $s1, nodes_count
     li $t2, 0
 
     li $v0, 4
@@ -65,19 +68,43 @@ print_node_grid_with_h:
     syscall
 
     li $v0, 1
-    move $a0, $t1
+    move $a0, $s1
     syscall
 
     li $v0, 4
     la $a0, newline
     syscall
+    move $s4, $ra
 
     print_loop_h:
-        bge $t2, $t1, print_end_h
+
+        bge $t2, $s1, print_end_h
+
 
         lw $t3, node_size
         mul $t4, $t2, $t3
-        add $t5, $t0, $t4
+        add $t5, $s0, $t4
+
+        # Debugging: Print loop counter and total nodes
+        li $v0, 4
+        la $a0, newline
+        syscall
+
+        li $v0, 1
+        move $a0, $t2  # Print loop counter
+        syscall
+
+        li $v0, 4
+        la $a0, comma
+        syscall
+
+        li $v0, 1
+        move $a0, $1  # Print total nodes
+        syscall
+
+        li $v0, 4
+        la $a0, newline
+        syscall
 
         # Print coordinates and wall status
         li $v0, 4
@@ -104,6 +131,16 @@ print_node_grid_with_h:
         lw $a0, wall($t5)
         syscall
 
+        # Load coordinates
+        lw $a0, x($t5) # x coordinate
+        lw $a1, y($t5) # y coordinate
+        lw $a2, goal_x # goal x
+        lw $a3, goal_y # goal y
+        # Calculate Manhattan heuristic
+        jal manhattan_heuristic    # this motherfucker is cahnging the $ra
+        move $t7, $v0 # Store heuristic in t1
+        sw $t7, hScore($t5) # Store heuristic in node
+
         # Print hScore
         li $v0, 4
         la $a0, hscore_str
@@ -118,9 +155,11 @@ print_node_grid_with_h:
         syscall
 
         addi $t2, $t2, 1
+        # move $ra, $s4
         j print_loop_h
 
 print_end_h:
+    move $ra, $s4
     jr $ra
 
 .include "h_calc.asm"

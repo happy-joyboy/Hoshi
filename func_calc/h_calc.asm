@@ -1,6 +1,5 @@
 .text
-
-manhattan_heuristic:            # Manhattan distance (|x1 - x2| + |y1 - y2|)
+manhattan_heuristic:
     # Inputs:
     #   $a0: current.x
     #   $a1: current.y
@@ -8,29 +7,23 @@ manhattan_heuristic:            # Manhattan distance (|x1 - x2| + |y1 - y2|)
     #   $a3: goal.y
     # Output:
     #   $v0: Manhattan distance
-
-    # Save return address
-    move $s0, $ra 
-
-    sub     $t4, $a0, $a2     # t4 = current.x - goal.x
-    bltz    $t4, neg_x        # If t4 < 0, branch to neg_x
-x_done:
-    sub     $t5, $a1, $a3     # t5 = current.y - goal.y
-    bltz    $t5, neg_y        # If t5 < 0, branch to neg_y
-y_done:
-    add     $v0, $t4, $t5     # v0 = |current.x - goal.x| + |current.y - goal.y|
+    
+    # Calculate |x1 - x2|
+    sub     $t0, $a0, $a2     # t0 = current.x - goal.x
+    bgez    $t0, skip_abs_x   # If t0 >= 0, skip making it positive
+    neg     $t0, $t0          # t0 = |t0| (absolute value)
+skip_abs_x:
+    
+    # Calculate |y1 - y2|
+    sub     $t1, $a1, $a3     # t1 = current.y - goal.y
+    bgez    $t1, skip_abs_y   # If t1 >= 0, skip making it positive
+    neg     $t1, $t1          # t1 = |t1| (absolute value)
+skip_abs_y:
+    
+    # Calculate Manhattan distance
+    add     $v0, $t0, $t1     # v0 = |x1-x2| + |y1-y2|
     
     jr      $ra               # Return to caller
-    
-neg_x:
-    sub     $t4, $zero, $t4   # t4 = zero - t4 (absolute value)
-    j       x_done            # Continue with y calculation
-    
-neg_y:
-    sub     $t5, $zero, $t5   # t5 = zero - t5 (absolute value)
-    j       y_done            # Continue with result calculation
-
-
 
 euclidean_heuristic:
     # Inputs:
@@ -39,35 +32,32 @@ euclidean_heuristic:
     #   $a2: goal.x
     #   $a3: goal.y
     # Output:
-    #   $v0: Euclidean distance (rounded to nearest integer)
-
-    # Calculate (x1 - x2)
-    sub     $t4, $a0, $a2
+    #   $v0: Approximate Euclidean distance
     
-    # Calculate (y1 - y2)
-    sub     $t5, $a1, $a3
+    # Calculate dx = |x1 - x2|
+    sub     $t0, $a0, $a2     # t0 = current.x - goal.x
+    bgez    $t0, skip_abs_x2  # If t0 >= 0, skip making it positive
+    neg     $t0, $t0          # t0 = |t0| (absolute value)
+skip_abs_x2:
     
-    # Convert (x1-x2) to float
-    mtc1    $t4, $f1
-    cvt.s.w $f1, $f1
+    # Calculate dy = |y1 - y2|
+    sub     $t1, $a1, $a3     # t1 = current.y - goal.y
+    bgez    $t1, skip_abs_y2  # If t1 >= 0, skip making it positive
+    neg     $t1, $t1          # t1 = |t1| (absolute value)
+skip_abs_y2:
     
-    # Convert (y1-y2) to float
-    mtc1    $t5, $f2
-    cvt.s.w $f2, $f2
+    # A simple approximation: max(dx, dy) + 0.5 * min(dx, dy)
+    move    $v0, $t0          # Assume t0 is max
+    move    $t2, $t1          # Assume t1 is min
     
-    # Square both
-    mul.s   $f3, $f1, $f1     # (x1-x2)^2
-    mul.s   $f4, $f2, $f2     # (y1-y2)^2
+    bge     $t0, $t1, max_is_correct
+    # If we get here, t1 is actually max
+    move    $v0, $t1          # v0 = max = t1
+    move    $t2, $t0          # t2 = min = t0
+max_is_correct:
     
-    # Add
-    add.s   $f5, $f3, $f4     # (x1-x2)^2 + (y1-y2)^2
+    # Calculate v0 + t2/2 (approximately max + 0.5*min)
+    srl     $t2, $t2, 1       # t2 = t2/2
+    add     $v0, $v0, $t2     # v0 = max + (min/2)
     
-    # Take square root
-    sqrt.s  $f0, $f5          # Result in $f0
-    
-    # Convert float result to integer (round to nearest)
-    cvt.w.s $f0, $f0          # Convert to word format
-    mfc1    $v0, $f0          # Move to integer register for return
-    
-    # Restore return address and return
     jr      $ra               # Return to caller
