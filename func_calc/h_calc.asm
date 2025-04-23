@@ -9,9 +9,6 @@ manhattan_heuristic:            # Manhattan distance (|x1 - x2| + |y1 - y2|)
     # Output:
     #   $v0: Manhattan distance
 
-    # Save return address
-    move $s0, $ra 
-
     sub     $t4, $a0, $a2     # t4 = current.x - goal.x
     bltz    $t4, neg_x        # If t4 < 0, branch to neg_x
 x_done:

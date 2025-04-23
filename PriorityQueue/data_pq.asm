@@ -11,7 +11,7 @@ msg_heap_empty: .asciiz "Heap is empty.\n"
 msg_extract:    .asciiz "Extracted node: "
 popcorn:        .asciiz "pop pop pop.....\n"
 message_coma:   .asciiz ", "
-newline:        .asciiz "\n"
+# newline:        .asciiz "\n"
 
 
     # dont include this file multile times or it will error
