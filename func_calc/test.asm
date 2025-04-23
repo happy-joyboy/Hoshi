@@ -21,7 +21,7 @@ str_euclidean: .asciiz "\nEuclidean Heuristic: "
 
 main:
     jal initialize_nodes
-    # jal calculate_all_heuristics  # New function to apply heuristic
+    jal calculate_all_heuristics  # New function to apply heuristic
     jal print_node_grid_with_h     # Modified print function
     li $v0, 10
     syscall
@@ -31,30 +31,45 @@ calculate_all_heuristics:
 
     la $s0, nodes
     lw $s1, nodes_count
-    li $s2, 0 # Node index
-    lw $s3, node_size
+    li $t2, 0
+    move $s4, $ra
 
     heuristic_loop:
     
-        bge $s2, $s1, heuristic_done
+        bge $t2, $s1, print_end_h
 
-        #load address of current node
-        mul $t0, $s2, $s3
-        add $t5, $s0, $t0
+        lw $t3, node_size
+        mul $t4, $t2, $t3
+        add $t5, $s0, $t4
         
         # Load coordinates
-        lw $a0, x($t1) # x coordinate
-        lw $a1, y($t1) # y coordinate
+        lw $a0, x($t5) # x coordinate
+        lw $a1, y($t5) # y coordinate
         lw $a2, goal_x # goal x
         lw $a3, goal_y # goal y
         # Calculate Manhattan heuristic
-        jal manhattan_heuristic
-        sw $v0, hScore($t1) # Store heuristic in node
+        jal euclidean_heuristic    # this motherfucker is cahnging the $ra
+        move $t7, $v0 # Store heuristic in t1
+        sw $t7, hScore($t5) # Store heuristic in node
 
-        addi $s2, $s2, 1 # Increment node index
+                # Print hScore
+        li $v0, 4
+        la $a0, hscore_str
+        syscall
+
+        li $v0, 1
+        lw $a0, hScore($t5)
+        syscall
+
+        li $v0, 4
+        la $a0, newline
+        syscall        
+
+        addi $t2, $t2, 1
         j heuristic_loop
 
 heuristic_done:
+    move $ra, $s4
     jr $ra
 
 # Modified print function to show hScores
@@ -79,7 +94,6 @@ print_node_grid_with_h:
     print_loop_h:
 
         bge $t2, $s1, print_end_h
-
 
         lw $t3, node_size
         mul $t4, $t2, $t3
@@ -131,16 +145,6 @@ print_node_grid_with_h:
         lw $a0, wall($t5)
         syscall
 
-        # Load coordinates
-        lw $a0, x($t5) # x coordinate
-        lw $a1, y($t5) # y coordinate
-        lw $a2, goal_x # goal x
-        lw $a3, goal_y # goal y
-        # Calculate Manhattan heuristic
-        jal manhattan_heuristic    # this motherfucker is cahnging the $ra
-        move $t7, $v0 # Store heuristic in t1
-        sw $t7, hScore($t5) # Store heuristic in node
-
         # Print hScore
         li $v0, 4
         la $a0, hscore_str
@@ -155,7 +159,6 @@ print_node_grid_with_h:
         syscall
 
         addi $t2, $t2, 1
-        # move $ra, $s4
         j print_loop_h
 
 print_end_h:
