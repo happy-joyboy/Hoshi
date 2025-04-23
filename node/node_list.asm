@@ -3,22 +3,25 @@ str_space:      .asciiz " "
 str_newline:    .asciiz "\n"
 
     # 3x3 nested array
-map_width:      .word   3
-map_height:     .word   3
+map_width:    .word 5
+map_height:   .word 5
 
 # Map data (0 = walkable, 1 = obstacle)
-map_data:     .word 0, 1, 0,   # Row 0
-                    0, 1, 0,   # Row 1
-                    0, 0, 0    # Row 2
+map_data:     .word 0, 0, 0, 0, 0,   # Row 0
+                    0, 1, 0, 1, 0,   # Row 1
+                    0, 1, 0, 0, 1,   # Row 2
+                    1, 0, 1, 0, 1,   # Row 3
+                    0, 0, 1, 0, 0    # Row 4
 
-    # Start and goal positions
-start_x:        .word   0
-start_y:        .word   0
-goal_x:         .word   2
-goal_y:         .word   2
+# Start and goal positions
+start_x:      .word 0
+start_y:      .word 0
+goal_x:       .word 4
+goal_y:       .word 4
 
-nodes:          .space  324                                 # 9 nodes × 36 bytes
-node_size:      .word   36                                  # Size of each node (36 bytes)
+nodes:          .word  0:225                                 # 25 nodes × 32 bytes
+closed_set:     .word   0:25                                  # 1 node × 32 bytes
+node_size:      .word   32                                  # Size of each node (32 bytes)
 nodes_count:    .word   0                                   # Number of nodes created
     # Offsets for fields within the node structure
                 .eqv    x, 0
@@ -38,7 +41,7 @@ newline:        .asciiz "\n"
 
 .text
 
-main:
+nodeListMain:
 
     jal     initialize_nodes                                # Create node grid from map
     jal     print_node_grid     
@@ -72,30 +75,29 @@ col_loop:
     add     $t2,                $t2,            $s5
     lw      $t3,                node_size
     mul     $t2,                $t2,            $t3         # × node_size
-    add     $t3,                $s0,            $t2         # t4 = base + (row * map_width + col) * node_size -> node address
+    add     $t2,                $s0,            $t2         # t3 = base + (row * map_width + col) * node_size -> node address
 
     # Store coordinates
-    sw      $s5,                x($t3)                      # Store row index in node
-    sw      $s4,                y($t3)                      # Store column index in node
+    sw      $s5,                x($t2)                      # Store Column index in node
+    sw      $s4,                y($t2)                      # Store row index in node
 
     # Store wall status
     lw      $t5,                0($t1)                      # Get map value
-    sw      $t5,                wall($t3)                   # Store wall status in node
+    sw      $t5,                wall($t2)                   # Store wall status in node
 
     # The star req
     li      $t6,                -1      
-    sw      $t6,                gScore($t3)                 # Initialize gScore to -1 (unvisited) except start node:   (still will add it) 
+    sw      $t6,                gScore($t2)                 # Initialize gScore to -1 (unvisited) except start node:   (still will add it) 
     li      $t6,                0
-    sw      $t6,                hScore($t3)                 # Initialize hScore to 0 (or any other value)
+    sw      $t6,                hScore($t2)                 # Initialize hScore to 0 (or any other value)
     add     $t6,                $t6,            $t6
-    sw      $t6,                fScore($t3)                 # Initialize fScore to 2 (or any other value)
+    sw      $t6,                fScore($t2)                 # Initialize fScore to 2 (or any other value)
     li      $t6,                0
-    sw      $t6,                parent_x($t3)               # Initialize parent_x to 0 (or any other value)
+    sw      $t6,                parent_x($t2)               # Initialize parent_x to 0 (or any other value)
     li      $t6,                0
-    sw      $t6,                parent_y($t3)               # Initialize parent_y to 0 (or any other value)
+    sw      $t6,                parent_y($t2)               # Initialize parent_y to 0 (or any other value)
 
 
-    lw      $t6,                node_size
 
     # Increment counters
     addi    $s5,                $s5,            1           # Next column
@@ -106,9 +108,6 @@ col_loop:
     j       col_loop
 
 next_row:
-    li      $v0,                4
-    la      $a0,                str_newline
-    syscall
     addi    $s4,                $s4,            1           # Increment row counter
     j       row_loop
 
@@ -116,25 +115,32 @@ _done:
     jr      $ra
 
 print_node_grid:
-    la      $t0,                nodes
-    lw      $t1,                nodes_count
-    li      $t2,                0
+    la      $s0,                nodes           # Base node address
+    lw      $s1,                map_width       # Grid width
+    lw      $s2,                map_height      # Grid height
+    
+    li      $s3,                0               # Row counter (y)
+print_row_loop:
+    beq     $s3,                $s2,    print_end
+    li      $s4,                0               # Column counter (x)
 
-print_loop:
-    bge     $t2,                $t1,            print_end
+print_col_loop:
+    beq     $s4,                $s1,    next_print_row
 
-    # Calculate node address
-    lw      $t3,                node_size
-    mul     $t4,                $t2,            $t3
-    add     $t5,                $t0,            $t4
+    # Calculate current node address
+    mul     $t0,                $s3,    $s1    # row * width
+    add     $t0,                $t0,    $s4    # + column
+    lw      $t1,                node_size
+    mul     $t0,                $t0,    $t1    # × node_size
+    add     $t0,                $s0,    $t0    # base + offset
 
-    # Print coordinates and wall status
+    # Print node details
     li      $v0,                4
     la      $a0,                node_str
     syscall
 
     li      $v0,                1
-    lw      $a0,                0($t5)                      # x
+    lw      $a0,                x($t0)          # Print x (column index)
     syscall
 
     li      $v0,                4
@@ -142,7 +148,7 @@ print_loop:
     syscall
 
     li      $v0,                1
-    lw      $a0,                4($t5)                      # y
+    lw      $a0,                y($t0)          # Print y (row index)
     syscall
 
     li      $v0,                4
@@ -150,15 +156,62 @@ print_loop:
     syscall
 
     li      $v0,                1
-    lw      $a0,                8($t5)                      # wall
+    lw      $a0,                wall($t0)       # Print wall status
     syscall
 
     li      $v0,                4
-    la      $a0,                newline
+    la      $a0,                comma
     syscall
 
-    addi    $t2,                $t2,            1
-    j       print_loop
+    li      $v0,                1
+    lw      $a0,                gScore($t0)     # Print gScore
+    syscall
+
+    li      $v0,                4
+    la      $a0,                comma
+    syscall
+
+    li      $v0,                1
+    lw      $a0,                hScore($t0)     # Print hScore
+    syscall
+
+    li      $v0,                4
+    la      $a0,                comma
+    syscall
+
+    li      $v0,                1
+    lw      $a0,                fScore($t0)     # Print fScore
+    syscall
+
+    li      $v0,                4
+    la      $a0,                comma
+    syscall
+
+    li      $v0,                1
+    lw      $a0,                parent_x($t0)   # Print parent_x
+    syscall
+
+    li      $v0,                4
+    la      $a0,                comma
+    syscall
+
+    li      $v0,                1
+    lw      $a0,                parent_y($t0)   # Print parent_y
+    syscall
+
+    li      $v0,                4
+    la      $a0,                str_newline
+    syscall
+
+    addi    $s4,                $s4,    1       # Next column
+    j       print_col_loop
+
+next_print_row:
+    li      $v0,                4
+    la      $a0,                str_newline
+    syscall
+    addi    $s3,                $s3,    1       # Next row
+    j       print_row_loop
 
 print_end:
     jr      $ra
@@ -207,4 +260,4 @@ get_g_score:
 
     jr $ra                    # Return to caller
 
-.include "PriorityQueue\pq.asm"
+.include "..\PriorityQueue\pq.asm"
