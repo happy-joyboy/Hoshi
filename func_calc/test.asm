@@ -2,22 +2,7 @@
 str_space:      .asciiz " "
 str_newline:    .asciiz "\n"
 
-    # 3x3 nested array
-map_width:      .word   3
-map_height:     .word   3
-
-# Map data (0 = walkable, 1 = obstacle)
-map_data:     .word 0, 1, 0,   # Row 0
-                    0, 1, 0,   # Row 1
-                    0, 0, 0    # Row 2
-
-    # Start and goal positions
-start_x:        .word   0
-start_y:        .word   0
-goal_x:         .word   2
-goal_y:         .word   2
-
-nodes:          .space  324                                 # 9 nodes × 36 bytes
+nodes:          .space  324                                 # 9 nodes ? 36 bytes
 node_size:      .word   36                                  # Size of each node (36 bytes)
 nodes_count:    .word   0                                   # Number of nodes created
     # Offsets for fields within the node structure
@@ -78,7 +63,7 @@ col_loop:
     mul     $t2,                $s4,            $s2
     add     $t2,                $t2,            $s5
     lw      $t3,                node_size
-    mul     $t2,                $t2,            $t3         # × node_size
+    mul     $t2,                $t2,            $t3         # ? node_size
     add     $t3,                $s0,            $t2         # t4 = base + (row * map_width + col) * node_size -> node address
 
     # Store coordinates
@@ -197,7 +182,9 @@ calculate_all_heuristics:
         jal manhattan_heuristic
         
         # Store result in node
-        sw $v0, hScore($a0)
+        li $s4, 0
+        addi $s4, $v0, 0
+        sw $s4, hScore($a0)
         
         addi $s2, $s2, 1
         j heuristic_loop
@@ -299,3 +286,5 @@ print_end_h:
     jr $ra
 
 .include "h_calc.asm"
+.include "map\MII.asm"
+.include "node\Node_list.asm"

@@ -21,7 +21,7 @@ map_width:    .word 3
 map_height:   .word 3
 
 # Map data (0 = walkable, 1 = obstacle)
-map_data:     .byte 0, 1, 0,   # Row 0
+map_data:     .word 0, 1, 0,   # Row 0
                     0, 1, 0,   # Row 1
                     0, 0, 0    # Row 2
 

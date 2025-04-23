@@ -2,21 +2,6 @@
 str_space:      .asciiz " "
 str_newline:    .asciiz "\n"
 
-    # 3x3 nested array
-map_width:      .word   3
-map_height:     .word   3
-
-# Map data (0 = walkable, 1 = obstacle)
-map_data:     .word 0, 1, 0,   # Row 0
-                    0, 1, 0,   # Row 1
-                    0, 0, 0    # Row 2
-
-    # Start and goal positions
-start_x:        .word   0
-start_y:        .word   0
-goal_x:         .word   2
-goal_y:         .word   2
-
 nodes:          .space  324                                 # 9 nodes × 36 bytes
 node_size:      .word   36                                  # Size of each node (36 bytes)
 nodes_count:    .word   0                                   # Number of nodes created
@@ -38,15 +23,13 @@ newline:        .asciiz "\n"
 
 .text
 
-main:
+# main:
 
-    jal     initialize_nodes                                # Create node grid from map
-    jal     print_node_grid     
-    
-                                # Verification print
+#     # jal     initialize_nodes                                # Create node grid from map
+#     # jal     print_node_grid     
 
-    li      $v0,                10                          # Exit
-    syscall
+#     li      $v0,                10                          # Exit
+#     syscall
 
 initialize_nodes:
     la      $s0,                nodes                       # Base node address
@@ -207,4 +190,5 @@ get_g_score:
 
     jr $ra                    # Return to caller
 
-.include "PriorityQueue\pq.asm"
+# .include "PriorityQueue\pq.asm"
+# .include "map\MII.asm"

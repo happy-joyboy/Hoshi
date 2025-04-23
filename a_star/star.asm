@@ -3,11 +3,11 @@
     d4x:           .word 0, 1, 0, -1
     d4y:           .word -1, 0, 1, 0
     
-    # Or 8-way movement (includes diagonals)
+# Or 8-way movement (includes diagonals)
     d8x:         .word 0, 1, 1, 1, 0, -1, -1, -1
     d8y:         .word -1, -1, 0, 1, 1, 1, 0, -1
     
-    # Message strings
+# Message strings
     mesg_path_found:   .asciiz "Path found!\n"
     mesg_no_path:      .asciiz "No path exists.\n"
 
@@ -15,8 +15,6 @@
 .globl main
 
 main:
-    # Initialize stack pointer
-    la $sp, 0x7FFFEFFC
     
     # Call A* algorithm
     jal a_star
@@ -51,7 +49,7 @@ a_star:
     lw $a2, goal_x
     lw $a3, goal_y
 
-    jal calculate_heuristic
+    jal manhattan_heuristic
     move $t1, $v0        # h_score
     
    # Calculate f_score = g_score + h_score
@@ -158,12 +156,12 @@ process_neighbors_loop:
     jal set_g_score
     
     # Calculate h_score
-    lw $a0, start_x
-    lw $a1, start_y
+    lw $a0, $s0
+    lw $a1, $s1
     lw $a2, goal_x
     lw $a3, goal_y
     
-    jal calculate_heuristic
+    jal manhattan_heuristic
     move $t7, $v0        # h_score
     
     # Calculate f_score = g_score + h_score
@@ -267,3 +265,4 @@ add_to_closed_set:
 
 .include "node\Node_list.asm"
 .include "func_calc\h_calc.asm"
+.include "helper\path.asm"
