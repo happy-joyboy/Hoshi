@@ -54,23 +54,29 @@
         
         # 2. Calculate new positions for objects
         # (Update positions based on frame counter or other logic)
-        la $t0, startX
-        lw $a0, 0($t0)                # Load startX
-        add $a0, $a0, $s0              # Update startX based on frame counter
+
+        # la $t0, startX
+        # lw $a0, 0($t0)                # Load startX
+        # add $a0, $a0, $s0              # Update startX based on frame counter
         
-        rem $a0, $a0, displayWidth    # Keep within display width
+        # rem $a0, $a0, displayWidth    # Keep within display width
 
-        la $t1, startY
-        lw $a1, 0($t1)                # Load startY
-        add $a1, $a1, $s0              # Update startY based on frame counter
+        # la $t1, startY
+        # lw $a1, 0($t1)                # Load startY
+        # add $a1, $a1, $s0              # Update startY based on frame counter
 
-        rem $a1, $a1, displayHeight   # Keep within display height
+        # rem $a1, $a1, displayHeight   # Keep within display height
 
-        # Set color to red (index 1)
-        li $a2, 1
-        add $a2, $a2, $s0              # Update color index based on frame counter
+        # # Set color to red (index 1)
+        # li $a2, 1
+        # add $a2, $a2, $s0              # Update color index based on frame counter
+        
+        lw $a0, startX
+        lw $a1, startY
+        lw $a2, endX
+        lw $a3, endY
         # 3. Draw objects at their new positions
-        jal drawPixel
+        jal drawline
         
         # 4. Add delay
         li $a0, 200         # 100 milliseconds delay
@@ -139,24 +145,49 @@ getColor:
         # a3 = endY
         move $s2, $ra            # startX
         # Calculate the differences
-        move $t0, $a0            # startX
+        move $t8, $a0            # startX
         move $t1, $a1            # startY
         move $t2, $a2            # endX
         move $t3, $a3            # endY
         sub $t4, $a2, $a0            # dx = endX - startX
         sub $t5, $a3, $a1            # dy = endY - startY
 
+        # Calculate the absolute values of dx and dy
+        flag:
+        bltz $t4, negX
+        bltz $t5, negY
 
         move $a0, $t1            # startY
         move $a1, $t3            # endY
         move $a2, $t5            # dy
+
+        li $t6, 0
         bnez $t4, loopY
 
-        move $a0, $t0            # startX
+        loopy_end:
+        move $a0, $t8            # startX
         move $a1, $t2            # endX
         move $a2, $t4            # dx
+        li $t6, 0
         bnez $t1, loopX
-        
+
+        loopX:
+           
+            bge $t6, $t5, loopX_end
+
+            add $a0, $t8, $t6 
+            move $a1, $t1            # startY
+            # Set color to red (index 1)
+            li $a2, 1
+            add $a2, $a2, $s0              # Update color index based on frame counter
+            jal getColor
+
+            jal drawPixel
+
+            addi $t6, $t6, 1
+        j loopX
+
+        loopX_end:
         # If both dx and dy are zero, just draw the pixel at startX, startY
 
         move $a0, $t0            # startX
@@ -170,10 +201,31 @@ getColor:
         jal drawPixel
 
         move $ra, $s2            # startX
-        jal $ra            # return to caller
+        jr $ra            # return to caller
 
         loopY:
+           
+            bge $t6, $t5, loopy_end
 
+            move $a0, $t8            # startX
+            add $a1, $t1, $t6        # startY + dy
+            # Set color to red (index 1)
+            li $a2, 1
+            add $a2, $a2, $s0              # Update color index based on frame counter
+            jal getColor
+
+            jal drawPixel
+
+            addi $t6, $t6, 1
+        j loopY
+
+        negX:
+            sub     $t4, $zero, $t4   # t4 = zero - t4 (absolute value)
+            j       flag
+            
+        negY:
+            sub     $t5, $zero, $t5   # t5 = zero - t5 (absolute value)
+            j       flag 
 
     reset_frame:
         li $s0, 0          # Reset frame counter
