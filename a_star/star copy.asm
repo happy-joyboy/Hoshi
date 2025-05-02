@@ -46,7 +46,7 @@ main:
     jal drawGridNode
 
         # 3. Add delay
-    li $a0, 500        # 100 milliseconds delay
+    li $a0, 100        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -56,7 +56,7 @@ main:
 
     # crazy mode
 
-    li $a0, 500        # 100 milliseconds delay
+    li $a0, 100        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -125,9 +125,6 @@ a_star_loop:
     bne     $t1,                    $t3,                not_goal
     bne     $t2,                    $t4,                not_goal
 
-
-
-
     # Found path to goal!
     j       path_found
 
@@ -140,12 +137,12 @@ not_goal:
     jal     add_to_closed_set
 
     # Draw current node
-    move    $a0,                    $t1                                     # x
-    move    $a1,                    $t2                                     # y
+    move    $a0,                    $s0                                     # x
+    move    $a1,                    $s1                                     # y
     li      $a2,                    5                           # color     # yellow
     jal drawGridNode
         #delay
-    li $a0, 50        # 100 milliseconds delay
+    li $a0, 100        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -176,6 +173,7 @@ process_neighbors_loop:
 
     add     $t4,                    $s0,                $t2                 # neighbor_x = current_x + dx
     add     $t5,                    $s1,                $t3                 # neighbor_y = current_y + dy
+
 
     # Save neighbor coordinates
     move    $s3,                    $t4                                     # x
@@ -263,7 +261,11 @@ process_neighbors_loop:
     sw      $s0,                    parent_x($t2)                           # Initialize parent_x to 0 (or any other value)
     sw      $s1,                    parent_y($t2)                           # Initialize parent_y to 0 (or any other value)
 
-
+    # skip start node  (yeah ...... ai wrote this ..... very very very helpful)
+    # if ($s3 == start_x && $s4 == start_y) {
+    #     j       next_neighbor
+    # }  
+    
     # draw current node
     move    $a0,                    $s0                                     # x
     move    $a1,                    $s1                                     # y
@@ -271,7 +273,7 @@ process_neighbors_loop:
     jal drawGridNode
 
     #delay
-    li $a0, 50        # 100 milliseconds delay
+    li $a0, 20        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -449,7 +451,7 @@ path_found:
     
     lw $a0, start_x
     lw $a1, start_y
-    li $a2, 5
+    li $a2, 8
     jal drawGridNode
 
     # Print "Path found" message

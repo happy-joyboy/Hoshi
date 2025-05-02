@@ -48,14 +48,14 @@ clearScreen:
     mul     $t1,                $t1,                displayHeight
     sll     $t1,                $t1,                2
     add     $t1,                $t1,                bitmapBaseAddress
-    li      $t2,                0xff0ff0                                # Black color
+    li      $t2,                0x808080                                # Black color
 clearLoop:
     sw      $t2,                0($t0)
     addi    $t0,                $t0,                4
     blt     $t0,                $t1,                clearLoop
     
     #delay
-    li $a0, 50        # 100 milliseconds delay
+    li $a0, 20        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -81,7 +81,7 @@ inner_loop:
     jal     drawGridNode
 
         #delay
-    li $a0, 30        # 100 milliseconds delay
+    li $a0, 10        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
