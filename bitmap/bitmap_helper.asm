@@ -7,11 +7,19 @@
     .eqv    gridHeight, 8
     .eqv    bitmapBaseAddress, 0x10040000
 colorTable:
-    .word   0xFAF9F6
-    .word   0x000000
-    .word   0x00ff00
-    .word   0xff0000
-    .word   0xffffff
+    .word   0xFAF9F6 # White (background)  0
+    .word   0x000000 # Black (background)  1
+    .word   0x00ff00 # Green               2
+    .word   0xff0000 # Red                 3
+    .word   0xffffff # White               4
+    .word   0xFFFF00 # Yellow              5
+    .word   0x0000FF # Blue               6
+    .word   0xFF00FF # Magenta            7
+    .word   0x00FFFF # Cyan              8
+    .word   0x808080 # Gray               9
+    .word   0xFFA500 # Orange            10
+    .word   0x800080 # Purple           11
+    .word   0xA52A2A # Brown            12
 grid:
     .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
     .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
@@ -21,18 +29,18 @@ grid:
     .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
     .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
     .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
+    # .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
 .text
-    .globl  main, clearScreen, drawPixel, drawGridNode, drawGrid
-main:
-    jal     clearScreen
-    la      $a0,                grid
-    li      $a1,                0
-    li      $a2,                1
-    jal     drawGrid
-exitProgram:
-    li      $v0,                10
-    syscall
+    .globl  clearScreen, drawPixel, drawGridNode, drawGrid
+# main:
+#     jal     clearScreen
+#     la      $a0,                grid
+#     li      $a1,                0
+#     li      $a2,                1
+#     jal     drawGrid
+# exitProgram:
+#     li      $v0,                10
+#     syscall
 
 clearScreen:
     li      $t0,                bitmapBaseAddress
@@ -93,20 +101,20 @@ drawGridNode:
     addi    $t7,                $t5,                gridCellWidth
     addi    $t8,                $t6,                gridCellHeight
 
-row_loop:
+row_loop_bitmap:
     bge     $t6,                $t8,                finish
     move    $t5,                $s7
-col_loop:
-    bge     $t5,                $t7,                next_row
+col_loop_bitmap:
+    bge     $t5,                $t7,                next_row_bitmap
     move    $a0,                $t5
     move    $a1,                $t6
     jal     drawPixel
     addi    $t5,                $t5,                1
-    j       col_loop
+    j       col_loop_bitmap
 
-next_row:
+next_row_bitmap:
     addi    $t6,                $t6,                1
-    j       row_loop
+    j       row_loop_bitmap
 
 finish:
     lw      $ra,                0($sp)
