@@ -53,6 +53,12 @@ clearLoop:
     sw      $t2,                0($t0)
     addi    $t0,                $t0,                4
     blt     $t0,                $t1,                clearLoop
+    
+    #delay
+    li $a0, 50        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall
+
     jr      $ra
     # $a0 = base address , $a1 = free space     , $a2 = wall color
 drawGrid:
@@ -73,6 +79,12 @@ inner_loop:
     addi    $sp,                $sp,                -4
     sw      $ra,                0($sp)
     jal     drawGridNode
+
+        #delay
+    li $a0, 30        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall
+
     addi    $s1,                $s1,                1
     j       inner_loop
 outer_loop_next:

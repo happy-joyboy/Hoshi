@@ -56,7 +56,9 @@ main:
 
     # crazy mode
 
-    
+    li $a0, 500        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall
 
     # Exit program
     li      $v0,                    10
@@ -142,6 +144,10 @@ not_goal:
     move    $a1,                    $t2                                     # y
     li      $a2,                    5                           # color     # yellow
     jal drawGridNode
+        #delay
+    li $a0, 50        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall
 
     # Process neighbors
 
@@ -263,6 +269,11 @@ process_neighbors_loop:
     move    $a1,                    $s1                                     # y
     li      $a2,                    9                                       # color
     jal drawGridNode
+
+    #delay
+    li $a0, 50        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall
 
     # #draw parent node
     # move    $a0,                    $s0                                     # x
@@ -390,7 +401,12 @@ path_found:
     move    $a0, $s5                 # x-coordinate
     move    $a1, $s6                 # y-coordinate
 
-    jal     drawGridNode             # Draw the node
+    jal     drawGridNode   
+    
+        #delay
+    li $a0, 50        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall          # Draw the node
 
     # Get the parent coordinates of the current node
     la      $s0,                nodes                       # Base node address
@@ -412,11 +428,11 @@ path_found:
     lw      $s5,                parent_x($t2)                   # Load parent_x
     lw      $s6,                parent_y($t2)                   # Load parent_y
 
-    #draw parent node
-    li      $a2, 10                   # Set color (e.g., green for the path)
-    move    $a0, $s5                 # x-coordinate
-    move    $a1, $s6                 # y-coordinate
-    jal     drawGridNode             # Draw the node
+    # #draw parent node
+    # li      $a2, 10                   # Set color (e.g., green for the path)
+    # move    $a0, $s5                 # x-coordinate
+    # move    $a1, $s6                 # y-coordinate
+    # jal     drawGridNode             # Draw the node
     
 
 
