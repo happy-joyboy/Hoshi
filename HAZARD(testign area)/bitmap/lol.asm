@@ -50,7 +50,7 @@
         jal clearScreen
     animation_loop:
     # 1. Clear the screen for each frame
-    # jal clearScreen
+    jal clearScreen
     
     # 2. Calculate new positions for objects
     lw $a0, startX     # Load the base coordinates
@@ -58,60 +58,25 @@
     lw $a2, endX
     lw $a3, endY
     
-    jal drawline
-    
-    # frame    # Draw points line (horizontal top)
-    li $a0, 2          # Fixed startX
-    li $a1, 2         # Fixed startY
-    li $a2, 2         # Fixed endX
-    li $a3, 2         # Same Y for horizontal line
-    # jal drawPixel
-
     # Add animation by adjusting coordinates based on frame counter
     add $a0, $a0, $s0  # Shift startX
     add $a2, $a2, $s0  # Shift endX
     
     # Draw a diagonal line between the points
     jal drawline
-
-    # Draw points line (vertical left)
+    
+    # Draw another line (horizontal)
     li $a0, 2          # Fixed startX
-    li $a1, 2         # Fixed startY
-    li $a2, 2         # Fixed endX
-    li $a3, 2         # Same Y for horizontal line
-    # jal drawPixel
-
-    # Add animation by adjusting coordinates based on frame counter
-    add $a1, $a1, $s0  # Shift startX
-    add $a3, $a3, $s0  # Shift endX
-    
-    # Draw a diagonal line between the points
+    li $a1, 15         # Fixed startY
+    li $a2, 20         # Fixed endX
+    li $a3, 15         # Same Y for horizontal line
     jal drawline
     
-    # Draw points line (horizontal bottom)
-    li $a0, 20          # Fixed startX
-    li $a1, 20         # Fixed startY
-    li $a2, 20         # Fixed endX
-    li $a3, 20         # Same Y for horizontal line
-
-    # Add animation by adjusting coordinates based on frame counter
-    sub $a0, $a0, $s0  # Shift startX
-    sub $a2, $a2, $s0  # Shift endX
-    
-    # Draw a diagonal line between the points
-    jal drawline
-
-    # Draw points line (vertical right)
-    li $a0, 20         # Fixed startX
-    li $a1, 20         # Fixed startY
-    li $a2, 20         # Fixed endX
-    li $a3, 20         # Same Y for horizontal line
-
-    # Add animation by adjusting coordinates based on frame counter
-    sub $a1, $a1, $s0  # Shift starty
-    sub $a3, $a3, $s0  # Shift endy
-    
-    # Draw a diagonal line between the points
+    # Draw another line (vertical)
+    li $a0, 25         # Fixed startX
+    li $a1, 5          # Fixed startY
+    li $a2, 25         # Same X for vertical line
+    li $a3, 25         # Fixed endY
     jal drawline
     
     # 3. Add delay
