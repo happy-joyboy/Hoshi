@@ -1,32 +1,8 @@
-.data
-    .eqv    displayWidth, 16                                            # Width of the display in units 512 / 32 = 16
-    .eqv    displayHeight, 16                                           # Height of the display in units 512 / 32 = 16
-    .eqv    gridCellWidth, 2                                            # Size of the display in bytes
-    .eqv    gridCellHeight, 2                                           # Size of the display in bytes
-    .eqv    gridWidth, 8
-    .eqv    gridHeight, 8
-    .eqv    bitmapBaseAddress, 0x10040000
-colorTable:
-    .word   0xFAF9F6
-    .word   0x000000
-    .word   0x00ff00
-    .word   0xff0000
-    .word   0xffffff
-grid:
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
 .text
-    .globl  main, clearScreen, drawPixel, drawGridNode, drawGrid
-main:
+    .globl  bitmapMain, clearScreen, drawPixel, drawGridNode, drawGrid
+bitmapMain:
     jal     clearScreen
-    la      $a0,                grid
+    la      $a0,                map_data
     li      $a1,                0
     li      $a2,                1
     jal     drawGrid
@@ -93,20 +69,20 @@ drawGridNode:
     addi    $t7,                $t5,                gridCellWidth
     addi    $t8,                $t6,                gridCellHeight
 
-row_loop:
+rowLoop:
     bge     $t6,                $t8,                finish
     move    $t5,                $s7
-col_loop:
-    bge     $t5,                $t7,                next_row
+colLoop:
+    bge     $t5,                $t7,                nextRow
     move    $a0,                $t5
     move    $a1,                $t6
     jal     drawPixel
     addi    $t5,                $t5,                1
-    j       col_loop
+    j       colLoop
 
-next_row:
+nextRow:
     addi    $t6,                $t6,                1
-    j       row_loop
+    j       rowLoop
 
 finish:
     lw      $ra,                0($sp)

@@ -1,30 +1,9 @@
-.data
-    # Movement directions (4-way: up, right, down, left)
-d4x:                .word       0, 1, 0, -1
-d4y:                .word       -1, 0, 1, 0
-
-    # Or 8-way movement (includes diagonals)
-d8x:                .word       0, 1, 1, 1, 0, -1, -1, -1
-d8y:                .word       -1, -1, 0, 1, 1, 1, 0, -1
-
-    # Message strings
-mesg_path_found:    .asciiz     "Path found!\n"
-mesg_no_path:       .asciiz     "No path exists.\n"
-
-                    .eqv        x, 0
-                    .eqv        y, 4
-                    .eqv        wall, 8                                     # 4 bytes
-                    .eqv        gScore, 12
-                    .eqv        hScore, 16
-                    .eqv        fScore, 20
-                    .eqv        parent_x, 24
-                    .eqv        parent_y, 28
-
+    .include    "..\data\data.asm"
 .text
-                    .globl      main
+    .globl      main
 
 main:
-    # Initialize stack pointer
+    # Initialize stack  pointer
     la      $sp,                    0x7FFFEFFC
 
     # Call A* algorithm
@@ -289,7 +268,7 @@ no_path_found:
 
 path_found:
     # Print "Path found" message
-    jal     print_node_grid
+    jal     printSolution
     la      $a0,                    mesg_path_found
     li      $v0,                    4                                       # Print string syscall
     syscall
@@ -324,6 +303,6 @@ add_to_closed_set:
 
     jr      $ra
 
-
-                    .include    "..\\node\\node_list.asm"
-                    .include    "..\func_calc\h_calc.asm"
+    .include    "..\PriorityQueue\pq.asm"
+    .include    "..\\node\\node_list.asm"
+    .include    "..\func_calc\h_calc.asm"
