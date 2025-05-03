@@ -39,7 +39,7 @@ main:
     lw      $a1,                start_y
     li      $a2,                12
     jal drawGridNode
-
+yellow
     lw      $a0,                goal_x
     lw      $a1,                goal_y
     li      $a2,                12
