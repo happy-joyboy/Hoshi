@@ -1,29 +1,21 @@
 .data
-    .eqv    displayWidth, 32                                            # Width of the display in units 1024 / 32 = 32
-    .eqv    displayHeight, 32                                           # Height of the display in units 1024 / 32 = 32
+    .eqv    displayWidth, 16                                            # Width of the display in units 512 / 32 = 16
+    .eqv    displayHeight, 16                                           # Height of the display in units 512 / 32 = 16
     .eqv    gridCellWidth, 2                                            # Size of the display in bytes
     .eqv    gridCellHeight, 2                                           # Size of the display in bytes
-    .eqv    gridWidth, 16
-    .eqv    gridHeight, 16
+    .eqv    gridWidth, 8
+    .eqv    gridHeight, 8
     .eqv    bitmapBaseAddress, 0x10040000
 
 grid:
-    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 0
-    .word 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0  # Row 1
-    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 2
-    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 3
-    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 4
-    .word 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1  # Row 5
-    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 6
-    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 7
-    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 8
-    .word 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0  # Row 9
-    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 10
-    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 11
-    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 12
-    .word 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1  # Row 13
-    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 14
-    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 15
+    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
+    .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
+    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
+    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
+    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
+    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
+    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
+    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
 colorTable:
     .word   0xFAF9F6 # White (background)  0
     .word   0x000000 # Black (background)  1

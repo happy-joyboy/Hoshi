@@ -39,33 +39,20 @@ main:
     lw      $a1,                start_y
     li      $a2,                12
     jal drawGridNode
-yellow
+
     lw      $a0,                goal_x
     lw      $a1,                goal_y
     li      $a2,                12
     jal drawGridNode
 
         # 3. Add delay
-    li $a0, 100        # 100 milliseconds delay
+    li $a0, 50        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
     # Call A* algorithm
     jal     a_star
 
-    # crazy mode
-
-    li $a0, 700        # 100 milliseconds delay
-    li $v0, 32         # syscall for sleep
-    syscall
-
-    jal    clearScreen
-
-    li $a0, 700        # 100 milliseconds delay
-    li $v0, 32         # syscall for sleep
-    syscall
-
-    jal wtf
 
     # Exit program
     li      $v0,                    10
@@ -78,6 +65,17 @@ a_star:
     sw      $s0,                    4($sp)
     sw      $s1,                    8($sp)
     sw      $s2,                    12($sp)
+
+        # draw start and goal nodes
+    lw      $a0,                start_x
+    lw      $a1,                start_y
+    li      $a2,                12
+    jal drawGridNode
+    
+    lw      $a0,                goal_x
+    lw      $a1,                goal_y
+    li      $a2,                12
+    jal drawGridNode
 
     # Initialize
     jal     initialize_nodes
@@ -437,7 +435,7 @@ path_found:
     lw      $s5,                parent_x($t2)                   # Load parent_x
     lw      $s6,                parent_y($t2)                   # Load parent_y
 
-    # #draw parent node
+    # # #draw parent node
     # li      $a2, 10                   # Set color (e.g., green for the path)
     # move    $a0, $s5                 # x-coordinate
     # move    $a1, $s6                 # y-coordinate
@@ -504,4 +502,3 @@ add_to_closed_set:
                     .include    "..\\node\\node_list.asm"
                     .include    "..\func_calc\h_calc.asm"
                     .include    "..\bitmap\bitmap_helper.asm"
-                    .include    "..\bitmap\lol.asm"
