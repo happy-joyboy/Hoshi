@@ -49,7 +49,7 @@
         # Initialize variables
         li $s0, 0          # Frame counter
         jal clearScreen
-    animation_loop:
+    animation_loop_z:
     # 1. Clear the screen for each frame
     jal clearScreen
     
@@ -92,55 +92,8 @@
     beq $s0, 20, reset_frame
     
     # 6. Repeat the loop
-    j animation_loop
+    j animation_loop_z
 
-    clearScreen:
-        li      $t0,                bitmapBaseAddress
-        li      $t1,                displayWidth
-        mul     $t1,                $t1,                displayHeight
-        sll     $t1,                $t1,                2
-        add     $t1,                $t1,                bitmapBaseAddress
-        li      $t2,                0x000000                                # Black color
-    clearLoop:
-        sw      $t2,                0($t0)
-        addi    $t0,                $t0,                4
-        blt     $t0,                $t1,                clearLoop
-        jr      $ra
-
-getColor:
-    la      $t0,                colorTableX
-    sll     $t1,                $a2,                2
-    add     $t0,                $t0,                $t1
-    lw      $v1,                0($t0)
-    jr      $ra
-
-    drawPixel:
-
-        # Check bounds
-        bltz $a0, drawPixelExit
-        bltz $a1, drawPixelExit
-        bge $a0, displayWidth, drawPixelExit
-        bge $a1, displayHeight, drawPixelExit
-        
-        # Calculate address
-        li $v0, bitmapBaseAddress
-        mul $t0, $a1, displayWidth    # y * width
-        add $t0, $t0, $a0             # + x
-        sll $t0, $t0, 2               # * 4 bytes per pixel
-        add $v0, $v0, $t0             # Add to base address
-        
-        # Get color
-        la $t0, colorTableX
-
-        sll $t1, $a2, 2               # Color index * 4
-        add $t0, $t0, $t1
-        lw $t0, 0($t0)                # Load RGB color
-        
-        # Store color
-        sw $t0, 0($v0)                # Write to memory
-        
-    drawPixelExit:
-        jr $ra
 
 drawline:
     # arguments: $a0=startX, $a1=startY, $a2=endX, $a3=endY
@@ -345,4 +298,4 @@ line_end:
     reset_frame:
         li $s0, 0          # Reset frame counter
         jal clearScreen
-        j animation_loop    # Jump back to the animation loop  
+        j animation_loop_z    # Jump back to the animation loop  

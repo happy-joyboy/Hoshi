@@ -6,6 +6,15 @@
     .eqv    gridWidth, 8
     .eqv    gridHeight, 8
     .eqv    bitmapBaseAddress, 0x10040000
+grid:
+    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
+    .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
+    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
+    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
+    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
+    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
+    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
+    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
 colorTable:
     .word   0xFAF9F6 # White (background)  0
     .word   0x000000 # Black (background)  1
@@ -20,16 +29,8 @@ colorTable:
     .word   0xFFA500 # Orange            10
     .word   0x800080 # Purple           11
     .word   0xA52A2A # Brown            12
-grid:
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    # .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
+
+
 .text
     .globl  clearScreen, drawPixel, drawGridNode, drawGrid
 # main:
