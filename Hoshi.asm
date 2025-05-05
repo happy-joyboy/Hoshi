@@ -1,27 +1,51 @@
 .data
 ########################################
 ##########   Common Data    ############
-map_width:    .word 8
-map_height:   .word 8
-.eqv    gridWidth, 8
-.eqv    gridHeight, 8
+map_width:    .word 32
+map_height:   .word 32
+.eqv    gridWidth, 32
+.eqv    gridHeight, 32
 
 # Map data (0 = walkable, 1 = obstacle)
 grid:
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 0
+    .word 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0  # Row 1
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 2
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 3
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 4
+    .word 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1  # Row 5
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 6
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 7
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 8
+    .word 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0  # Row 9
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 10
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 11
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 12
+    .word 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1  # Row 13
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 14
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 15
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 16
+    .word 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0  # Row 17
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 18
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 19
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 20
+    .word 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1  # Row 21
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 22
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 23
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 24
+    .word 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0  # Row 25
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  # Row 26
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 27
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 28
+    .word 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1  # Row 29
+    .word 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0  # Row 30
+    .word 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0  # Row 31
 
 # Start and goal positions
 start_x:      .word 0
 start_y:      .word 0
-goal_x:       .word 7
-goal_y:       .word 7
+goal_x:       .word 31
+goal_y:       .word 31
 
 # Offsets for fields within the node structure
     .eqv    x, 0
@@ -36,10 +60,10 @@ goal_y:       .word 7
 ########################################
 #############   Bit Map   ##############
 
-    .eqv    displayWidth, 16                                            # Width of the display in units 512 / 32 = 16
-    .eqv    displayHeight, 16                                           # Height of the display in units 512 / 32 = 16
-    .eqv    gridCellWidth, 2                                            # Size of the display in bytes
-    .eqv    gridCellHeight, 2                                           # Size of the display in bytes
+    .eqv    displayWidth, 32                                            # Width of the display in units 512 / 32 = 16
+    .eqv    displayHeight, 32                                           # Height of the display in units 512 / 32 = 16
+    .eqv    gridCellWidth, 1                                            # Size of the display in bytes
+    .eqv    gridCellHeight, 1                                           # Size of the display in bytes
     .eqv    bitmapBaseAddress, 0x10040000
 
 colorTable:
@@ -71,8 +95,8 @@ d8y:                .word       -1, -1, 0, 1, 1, 1, 0, -1
 ########################################
 ############   Node List   #############
 
-nodes:          .word  0:576                                 # 64 nodes × 32 bytes
-closed_set:     .word   0:64                                  # 1 node × 32 bytes
+nodes:          .word  0:9216                                 # 64 nodes × 32 bytes
+closed_set:     .word   0:1024                                  # 1 node × 32 bytes
 node_size:      .word   32                                  # Size of each node (32 bytes)
 nodes_count:    .word   0                                   # Number of nodes created
 
@@ -132,7 +156,7 @@ main:
     jal drawGridNode
 
         # 3. Add delay
-    li $a0, 50        # 100 milliseconds delay
+    li $a0, 10        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -160,7 +184,7 @@ clearLoop:
     blt     $t0,                $t1,                clearLoop
     
     #delay
-    li $a0, 20        # 100 milliseconds delay
+    li $a0, 10        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -186,7 +210,7 @@ inner_loop:
     jal     drawGridNode
 
         #delay
-    li $a0, 10        # 100 milliseconds delay
+    li $a0, 5        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -362,7 +386,7 @@ not_goal:
     li      $a2,                    5                           # color     # yellow
     jal drawGridNode
         #delay
-    li $a0, 100        # 100 milliseconds delay
+    li $a0, 50        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -477,7 +501,7 @@ process_neighbors_loop:
     jal drawGridNode
 
     #delay
-    li $a0, 20        # 100 milliseconds delay
+    li $a0, 10        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
 
@@ -591,7 +615,7 @@ path_found:
     jal     drawGridNode   
     
         #delay
-    li $a0, 50        # 100 milliseconds delay
+    li $a0, 10        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall          # Draw the node
 
