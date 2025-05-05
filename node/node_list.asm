@@ -1,7 +1,5 @@
 .data
 str_space:      .asciiz " "
-str_newline:    .asciiz "\n"
-
 map_width:    .word 8
 map_height:   .word 8
 
@@ -39,7 +37,7 @@ nodes_count:    .word   0                                   # Number of nodes cr
 
 
 node_str:       .asciiz "Node ["
-comma:          .asciiz ","
+msg_coma:          .asciiz ","
 wall_str:       .asciiz "] Wall: "
 newline:        .asciiz "\n"
 
@@ -148,7 +146,8 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                comma
+    la      $a0,                msg_coma
+
     syscall
 
     li      $v0,                1
@@ -164,7 +163,8 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                comma
+    la      $a0,                msg_coma
+
     syscall
 
     li      $v0,                1
@@ -172,7 +172,8 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                comma
+    la      $a0,                msg_coma
+
     syscall
 
     li      $v0,                1
@@ -180,7 +181,8 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                comma
+    la      $a0,                msg_coma
+
     syscall
 
     li      $v0,                1
@@ -188,7 +190,8 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                comma
+    la      $a0,                msg_coma
+
     syscall
 
     li      $v0,                1
@@ -196,7 +199,8 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                comma
+    la      $a0,                msg_coma
+
     syscall
 
     li      $v0,                1
@@ -204,7 +208,7 @@ print_col_loop:
     syscall
 
     li      $v0,                4
-    la      $a0,                str_newline
+    la      $a0,                newline
     syscall
 
     addi    $s4,                $s4,    1       # Next column
@@ -212,7 +216,7 @@ print_col_loop:
 
 next_print_row:
     li      $v0,                4
-    la      $a0,                str_newline
+    la      $a0,                newline
     syscall
     addi    $s3,                $s3,    1       # Next row
     j       print_row_loop

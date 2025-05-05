@@ -1,5 +1,5 @@
 .data
-    # Movement directions (4-way: up, right, down, left)
+# Movement directions (4-way: up, right, down, left)
 d4x:                .word       0, 1, 0, -1
 d4y:                .word       -1, 0, 1, 0
 
@@ -8,8 +8,8 @@ d8x:                .word       0, 1, 1, 1, 0, -1, -1, -1
 d8y:                .word       -1, -1, 0, 1, 1, 1, 0, -1
 
     # Message strings
-mesg_path_found:    .asciiz     "Path found!\n"
-mesg_no_path:       .asciiz     "No path exists.\n"
+msg_path_found:    .asciiz     "Path found!\n"
+msg_no_path:       .asciiz     "No path exists.\n"
 
                     .eqv        x, 0
                     .eqv        y, 4
@@ -367,7 +367,7 @@ is_valid_exit:
 
 no_path_found:
     # Print "No path exists" message
-    la      $a0,                    mesg_no_path
+    la      $a0,                    msg_no_path
     li      $v0,                    4                                       # Print string syscall
     syscall
     j       a_star_exit
@@ -461,7 +461,7 @@ path_found:
 
     # Print "Path found" message
     jal     print_node_grid
-    la      $a0,                    mesg_path_found
+    la      $a0,                    msg_path_found
     li      $v0,                    4                                       # Print string syscall
     syscall
     j       a_star_exit

@@ -10,7 +10,7 @@ msg_heap_full:  .asciiz "Heap is full. Cannot insert.\n"
 msg_heap_empty: .asciiz "Heap is empty.\n"
 msg_extract:    .asciiz "Extracted node: "
 popcorn:        .asciiz "pop pop pop.....\n"
-message_coma:   .asciiz ", "
+msg_coma:   .asciiz ", "
 # newline:        .asciiz "\n"
 
 
