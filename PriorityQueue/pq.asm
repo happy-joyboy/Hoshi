@@ -218,7 +218,7 @@ print_heap_loop:
     syscall
 
     # Print comma and space
-    la      $a0,                message_coma
+    la      $a0,                msg_coma
     li      $v0,                4
     syscall
 
@@ -228,7 +228,7 @@ print_heap_loop:
     syscall
 
     # Print comma and space
-    la      $a0,                message_coma
+    la      $a0,                msg_coma
     li      $v0,                4
     syscall
 
@@ -238,7 +238,7 @@ print_heap_loop:
     syscall
 
     # Print comma and space
-    la      $a0,                message_coma
+    la      $a0,                msg_coma
     li      $v0,                4
     syscall
 
@@ -272,7 +272,7 @@ print_EX_node:
     li      $v0,                1
     syscall
 
-    la      $a0,                message_coma
+    la      $a0,                msg_coma
     li      $v0,                4
     syscall
 
@@ -281,7 +281,7 @@ print_EX_node:
     li      $v0,                1
     syscall
 
-    la      $a0,                message_coma
+    la      $a0,                msg_coma
     li      $v0,                4
     syscall
 
@@ -290,7 +290,7 @@ print_EX_node:
     li      $v0,                1
     syscall
 
-    la      $a0,                message_coma
+    la      $a0,                msg_coma
     li      $v0,                4
     syscall
 

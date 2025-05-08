@@ -259,8 +259,10 @@ print_col_loop:
     lw      $a0,                    x($t0)                                                                      # Print x (column index)
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    comma
+
     syscall
 
     li      $v0,                    1
@@ -275,56 +277,70 @@ print_col_loop:
     lw      $a0,                    wall($t0)                                                                   # Print wall status
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    comma
+
     syscall
 
     li      $v0,                    1
     lw      $a0,                    gScore($t0)                                                                 # Print gScore
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    comma
+
     syscall
 
     li      $v0,                    1
     lw      $a0,                    hScore($t0)                                                                 # Print hScore
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    comma
+
     syscall
 
     li      $v0,                    1
     lw      $a0,                    fScore($t0)                                                                 # Print fScore
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    comma
+
     syscall
 
     li      $v0,                    1
     lw      $a0,                    parent_x($t0)                                                               # Print parent_x
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    comma
+
     syscall
 
     li      $v0,                    1
     lw      $a0,                    parent_y($t0)                                                               # Print parent_y
     syscall
 
+
     li      $v0,                    4
     la      $a0,                    newline
+
     syscall
 
     addi    $s4,                    $s4,            1                                                           # Next column
     j       print_col_loop
 
 next_print_row:
+
     li      $v0,                    4
     la      $a0,                    newline
+
     syscall
     addi    $s3,                    $s3,            1                                                           # Next row
     j       print_row_loop

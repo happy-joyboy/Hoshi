@@ -1,3 +1,4 @@
+
 .text
     .globl  bitmapMain, clearScreen, drawPixel, drawGridNode, drawGrid
 bitmapMain:
@@ -10,13 +11,15 @@ exitProgram:
     li      $v0,                10
     syscall
 
+
 clearScreen:
     li      $t0,                bitmapBaseAddress
     li      $t1,                displayWidth
     mul     $t1,                $t1,                displayHeight
     sll     $t1,                $t1,                2
     add     $t1,                $t1,                bitmapBaseAddress
-    li      $t2,                0xff0ff0                                # Black color
+    li      $t2,                0x808080                                # Black color
+
 clearLoop:
     sw      $t2,                0($t0)
     addi    $t0,                $t0,                4
@@ -41,6 +44,12 @@ inner_loop:
     addi    $sp,                $sp,                -4
     sw      $ra,                0($sp)
     jal     drawGridNode
+
+
+    #delay
+    li $a0, 10        # 100 milliseconds delay
+    li $v0, 32         # syscall for sleep
+    syscall
     addi    $s1,                $s1,                1
     j       inner_loop
 outer_loop_next:
@@ -69,20 +78,24 @@ drawGridNode:
     addi    $t7,                $t5,                gridCellWidth
     addi    $t8,                $t6,                gridCellHeight
 
-rowLoop:
+
+row_loop_bitmap:
     bge     $t6,                $t8,                finish
     move    $t5,                $s7
-colLoop:
-    bge     $t5,                $t7,                nextRow
+col_loop_bitmap:
+    bge     $t5,                $t7,                next_row_bitmap
+
     move    $a0,                $t5
     move    $a1,                $t6
     jal     drawPixel
     addi    $t5,                $t5,                1
-    j       colLoop
 
-nextRow:
+    j       col_loop_bitmap
+
+next_row_bitmap:
     addi    $t6,                $t6,                1
-    j       rowLoop
+    j       row_loop_bitmap
+
 
 finish:
     lw      $ra,                0($sp)
