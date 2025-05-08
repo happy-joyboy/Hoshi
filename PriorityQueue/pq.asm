@@ -1,4 +1,4 @@
-.include    "data_pq.asm"
+    .include    "data_pq.asm"
 .text
 
 
@@ -60,28 +60,39 @@ bubble_up:
 bubble_up_end:
     jr      $ra
 
+    # assume:
+    #   heap:            space for N nodes (each 16 bytes)
+    #   heapSize:        .word 0
+    #   heap_capacity:   .word N
+    #   extracted_node:  .space 16
+
+.text
 pop:
+    # 1) Load heapSize, if zero → pop_failed
     la      $t0,                heapSize
     lw      $t1,                0($t0)
     beqz    $t1,                pop_failed
 
-    la      $t2,                heap
-    lw      $t3,                0($t2)
-    lw      $t4,                4($t2)
-    lw      $t5,                8($t2)
-    lw      $t6,                12($t2)
+    # 2) Extract root into extracted_node
+    la      $t2,                heap                                # base of heap array
+    lw      $t3,                0($t2)                              # x
+    lw      $t4,                4($t2)                              # y
+    lw      $t5,                8($t2)                              # parent
+    lw      $t6,                12($t2)                             # fScore
     la      $t7,                extracted_node
     sw      $t3,                0($t7)
     sw      $t4,                4($t7)
     sw      $t5,                8($t7)
     sw      $t6,                12($t7)
 
+    # 3) Decrement heapSize; if it becomes 0 → done
     addi    $t1,                $t1,                -1
     sw      $t1,                0($t0)
     beqz    $t1,                pop_end
 
+    # 4) Move last element into root
     la      $t2,                heap
-    sll     $t3,                $t1,                4
+    sll     $t3,                $t1,                4               # offset = index * 16
     add     $t4,                $t2,                $t3
     lw      $t7,                0($t4)
     lw      $t8,                4($t4)
@@ -91,92 +102,91 @@ pop:
     sw      $t8,                4($t2)
     sw      $t9,                8($t2)
     sw      $t0,                12($t2)
-    li      $t3,                0
-    j       bubble_down
+
+    # 5) Bubble-down from index=0
+    li      $s0,                0                                   # $s0 = current index
 
 bubble_down:
-    sll     $t4,                $t3,                1
-    addi    $t5,                $t4,                1
-    addi    $t6,                $t4,                2
-    move    $t7,                $t3                                 # Candidate index
+    # compute child indices
+    sll     $t1,                $s0,                1               # t1 = 2*idx
+    addi    $t2,                $t1,                1               # leftIdx  = 2*idx + 1
+    addi    $t3,                $t1,                2               # rightIdx = 2*idx + 2
 
-    la      $t8,                heapSize
-    lw      $t9,                0($t8)
-    bgt     $t5,                $t9,                pop_end
-    bgt     $t6,                $t9,                pop_end
-    la      $t0,                heap
-    sll     $t1,                $t5,                4
-    add     $t0,                $t0,                $t1
-    lw      $t2,                12($t0)                             # Left child fScore
-    la      $t0,                heap
-    sll     $t1,                $t6,                4
-    add     $t0,                $t0,                $t1
-    lw      $t3,                12($t0)                             # Right child fScore
-    blt     $t2,                $t3,                check_left
-    la      $t0,                heap
-    sll     $t7,                $t7,                4
-    add     $t7,                $t0,                $t7
-    lw      $t2,                12($t7)                             # node fScore
-    blt     $t2,                $t3,                pop_end
-    # Swap using $t registers
-    sll     $t6,                $t6,                4
-    add     $t6,                $t0,                $t6
-    lw      $t0,                0($t6)
-    lw      $t1,                0($t7)
-    sw      $t0,                0($t7)
+    # reload heapSize
+    la      $t4,                heapSize
+    lw      $t5,                0($t4)
+
+    # if leftIdx >= heapSize → no children → done
+    bge     $t2,                $t5,                pop_end
+
+    # if rightIdx >= heapSize → only left child exists
+    bge     $t3,                $t5,                only_left_child
+
+    # both children exist → pick the one with smaller fScore
+    la      $t6,                heap
+    sll     $t7,                $t2,                4
+    add     $t8,                $t6,                $t7
+    lw      $t9,                12($t8)                             # f_left
+    sll     $t7,                $t3,                4
+    add     $t8,                $t6,                $t7
+    lw      $t0,                12($t8)                             # f_right
+    blt     $t9,                $t0,                pick_left
+    move    $s1,                $t3                                 # choose right
+    j       do_swap
+
+pick_left:
+    move    $s1,                $t2                                 # choose left
+
+only_left_child:
+    move    $s1,                $t2                                 # only left child
+
+do_swap:
+    # compare node.fScore vs child.fScore
+    la      $t6,                heap
+    sll     $t7,                $s0,                4
+    add     $t8,                $t6,                $t7
+    lw      $t9,                12($t8)                             # f_node
+    sll     $t7,                $s1,                4
+    add     $t6,                $t6,                $t7
+    lw      $t0,                12($t6)                             # f_child
+    blt     $t9,                $t0,                pop_end         # if node ≤ child, heap property holds
+
+    # swap the two full 16-byte nodes
+    # node @ $t8, child @ $t6
+    lw      $t1,                0($t8)
+    lw      $t2,                0($t6)
+    sw      $t2,                0($t8)
     sw      $t1,                0($t6)
-    lw      $t0,                4($t6)
-    lw      $t1,                4($t7)
-    sw      $t0,                4($t7)
+    lw      $t1,                4($t8)
+    lw      $t2,                4($t6)
+    sw      $t2,                4($t8)
     sw      $t1,                4($t6)
-    lw      $t0,                8($t6)
-    lw      $t1,                8($t7)
-    sw      $t0,                8($t7)
+    lw      $t1,                8($t8)
+    lw      $t2,                8($t6)
+    sw      $t2,                8($t8)
     sw      $t1,                8($t6)
-    lw      $t0,                12($t6)
-    lw      $t1,                12($t7)
-    sw      $t0,                12($t7)
+    lw      $t1,                12($t8)
+    lw      $t2,                12($t6)
+    sw      $t2,                12($t8)
     sw      $t1,                12($t6)
 
-
-check_left:
-    la      $t0,                heap
-    sll     $t7,                $t7,                4
-    add     $t7,                $t0,                $t7
-    lw      $t3,                12($t7)                             # node fScore
-    blt     $t3,                $t2,                pop_end
-    # Swap using $t registers
-    sll     $t5,                $t5,                4
-    add     $t5,                $t0,                $t5
-    lw      $t0,                0($t5)
-    lw      $t1,                0($t7)
-    sw      $t0,                0($t7)
-    sw      $t1,                0($t5)
-    lw      $t0,                4($t5)
-    lw      $t1,                4($t7)
-    sw      $t0,                4($t7)
-    sw      $t1,                4($t5)
-    lw      $t0,                8($t5)
-    lw      $t1,                8($t7)
-    sw      $t0,                8($t7)
-    sw      $t1,                8($t5)
-    lw      $t0,                12($t5)
-    lw      $t1,                12($t7)
-    sw      $t0,                12($t7)
-    sw      $t1,                12($t5)
+    # continue bubbling down from new position
+    move    $s0,                $s1
+    j       bubble_down
 
 pop_end:
     jr      $ra
 
 pop_failed:
-    li      $t0,                -1
-    sw      $t0,                0($a0)
-    sw      $t0,                4($a0)
-    sw      $t0,                8($a0)
-    sw      $t0,                12($a0)
+    # on empty-heap, write –1 into extracted_node
+    la      $t1,                extracted_node
+    li      $t2,                -1
+    sw      $t2,                0($t1)
+    sw      $t2,                4($t1)
+    sw      $t2,                8($t1)
+    sw      $t2,                12($t1)
     jr      $ra
 
-    # Printing routines remain unchanged but ensure no saved registers are used.
 
 push_full:
     # Print "Heap is full" message
@@ -296,38 +306,38 @@ print_EX_node:
 
     jr      $ra
 
-# Helper function to find node by coordinates
-# Input: $a0 = x, $a1 = y
-# Output: $v0 = node address
+    # Helper function to find node by coordinates
+    # Input: $a0 = x, $a1 = y
+    # Output: $v0 = node address
 find_node:
-    la $t0, nodes
-    lw $t1, nodes_count
-    li $t2, 0
+    la      $t0,                nodes
+    lw      $t1,                nodes_count
+    li      $t2,                0
 
-    find_loop:
-        bge $t2, $t1, not_found
-        
-        lw $t3, node_size
-        mul $t4, $t2, $t3
-        add $t5, $t0, $t4
-        
-        lw $t6, x($t5)
-        lw $t7, y($t5)
-        
-        beq $t6, $a0, check_y
-        j next_node
-        
-    check_y:
-        beq $t7, $a1, found_node
-        
-    next_node:
-        addi $t2, $t2, 1
-        j find_loop
-        
-    found_node:
-        move $v0, $t5
-        jr $ra
-        
-    not_found:
-        li $v0, 0
-        jr $ra
+find_loop:
+    bge     $t2,                $t1,                not_found
+
+    lw      $t3,                node_size
+    mul     $t4,                $t2,                $t3
+    add     $t5,                $t0,                $t4
+
+    lw      $t6,                x($t5)
+    lw      $t7,                y($t5)
+
+    beq     $t6,                $a0,                check_y
+    j       next_node
+
+check_y:
+    beq     $t7,                $a1,                found_node
+
+next_node:
+    addi    $t2,                $t2,                1
+    j       find_loop
+
+found_node:
+    move    $v0,                $t5
+    jr      $ra
+
+not_found:
+    li      $v0,                0
+    jr      $ra

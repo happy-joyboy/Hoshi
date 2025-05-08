@@ -15,23 +15,20 @@ main:
 
 a_star:
     # Save return address and preserved registers
-    addi    $sp,                    $sp,                -16
+    addi    $sp,                    $sp,                -4
     sw      $ra,                    0($sp)
-    sw      $s0,                    4($sp)
-    sw      $s1,                    8($sp)
-    sw      $s2,                    12($sp)
 
     # Initialize
     jal     initialize_nodes
 
+
     # Add start node to open set
     lw      $a0,                    start_x                                 # x
     lw      $a1,                    start_y                                 # y
-    li      $t0,                    0                                       # g_score = 0
-
     # Set g_score for start node
-    move    $a2,                    $t0
+    li      $a2,                    0
     jal     set_g_score
+
 
     # Calculate h_score for start node
     lw      $a0,                    start_x
@@ -40,12 +37,12 @@ a_star:
     lw      $a3,                    goal_y
 
     jal     manhattan_heuristic
+    move    $a2,                    $v0                                     # h_score
+    jal     set_f_score
     move    $t1,                    $v0                                     # h_score
-
     # Calculate f_score = g_score + h_score
     # add     $t2,                    $t0,                $t1                 # f_score
 
-    # Push start node to open set
     lw      $a0,                    start_x                                 # x
     lw      $a1,                    start_y                                 # y
     move    $a2,                    $zero                                   # parent (none for start)
@@ -62,7 +59,17 @@ a_star_loop:
 
     # Pop node with lowest f_score
     jal     pop
-
+    # check if the fscore is exactly the same as the one stored in the node
+    #
+    la      $t0,                    extracted_node
+    lw      $s1,                    12($t0)                                 # f_score
+    lw      $a0,                    0($t0)                                  # x
+    lw      $a1,                    4($t0)                                  # y
+    # Check if in closed set
+    jal     is_in_closed_set
+    bnez    $v0,                    a_star_loop
+    jal     get_f_score
+    bne     $s1,                    $v0,                a_star_loop
     # Check if popped node is goal
     la      $t0,                    extracted_node
     lw      $t1,                    0($t0)                                  # x
@@ -79,6 +86,7 @@ a_star_loop:
 
 not_goal:
     # Add current node to closed set
+    # print curr node should be here
     move    $a0,                    $t1                                     # x
     move    $a1,                    $t2                                     # y
     move    $s0,                    $t1                                     # Save current x
@@ -92,7 +100,13 @@ not_goal:
     move    $a1,                    $s1
     jal     get_g_score
     move    $s2,                    $v0                                     # Save g_score
-
+    move    $a0,                    $s0                                     # x
+    move    $a1,                    $s1                                     # y
+    li      $a2,                    6                                       # current status
+    jal     drawGridNode
+    li      $a0,                    50                                      # Delay time in milliseconds (e.g., 500ms)
+    li      $v0,                    32                                      # MARS syscall for sleep
+    syscall
     # Process each neighbor
     li      $s5,                    0                                       # Direction index
 
@@ -130,23 +144,32 @@ process_neighbors_loop:
     bnez    $v0,                    next_neighbor
 
     # Calculate tentative g_score
-    addi    $t6,                    $s2,                1                   # tentative_g = current_g + 10 (cost)
+    addi    $t6,                    $s2,                1                   # tentative_g = current_g + 1 (cost)
 
-    # # Get existing g_score for neighbor
-    # move    $a0,                    $s3
-    # move    $a1,                    $s4
-    # jal     get_g_score
-    # move    $t7,                    $v0                                     # neighbor's current g_score
-
-    # If tentative_g >= existing g_score, skip
-    # bltz     $t6,                    $t7,                next_neighbor
-
-    # Update g_score
+    # Get existing g_score for neighbor
     move    $a0,                    $s3
     move    $a1,                    $s4
-    move    $a2,                    $t6
-    jal     set_g_score
+    jal     get_g_score
+    move    $t7,                    $v0                                     # neighbor's current g_score
 
+    #If tentative_g >= existing g_score, skip
+    bge     $t6,                    $t7,                next_neighbor
+    addi    $sp,                    $sp,                -4
+    sw      $t6,                    0($sp)
+    move    $a0,                    $s3                                     # x
+    move    $a1,                    $s4                                     # y
+    li      $a2,                    4                                       # visited status
+    jal     drawGridNode
+    li      $a0,                    50                                      # Delay time in milliseconds (e.g., 500ms)
+    li      $v0,                    32                                      # MARS syscall for sleep
+    syscall
+    # # Update g_score
+    # move    $a0,                    $s3
+    # move    $a1,                    $s4
+    # move    $a2,                    $t6
+    # jal     set_g_score
+    lw      $t6,                    0($sp)
+    addi    $sp,                    $sp,                4
     # Calculate h_score
     move    $a0,                    $s3
     move    $a1,                    $s4
@@ -159,10 +182,6 @@ process_neighbors_loop:
     # Calculate f_score = g_score + h_score
     add     $t8,                    $t6,                $t7                 # f_score
 
-    # Generate parent index
-    sll     $t9,                    $s1,                16                  # parent_y << 16
-    or      $t9,                    $t9,                $s0                 # (parent_y << 16) | parent_x
-
     la      $t0,                    nodes                                   # Base node address
     la      $t1,                    map_data                                # Map data pointer
     lw      $t3,                    map_width                               # Grid dimensions
@@ -173,26 +192,24 @@ process_neighbors_loop:
     mul     $t2,                    $t4,                $t2                 # t0 = (row * map_width + col) * 4
     add     $t2,                    $t2,                $t0                 # t1 = base + (row * map_width + col) * 4  -> map address
 
-    mul     $t3,                    $s4,                $t3
-    add     $t3,                    $t3,                $s3
-    sll     $t3,                    $t3,                2                   # t3 = (row * map_width + col) * 4
-    add     $t3,                    $t1,                $t3                 # t3 = base + (row * map_width + col) * node_size -> node address
-
     # Store coordinates
     sw      $s3,                    x($t2)                                  # Store Column index in node
     sw      $s4,                    y($t2)                                  # Store row index in node
 
     # Store wall status
-    lw      $t5,                    0($t3)                                  # Get map value
+    li      $t5,                    0                                       # Get map value
     sw      $t5,                    wall($t2)                               # Store wall status in node
 
     # The star req
-    sw      $t6,                    gScore($t2)                             # Initialize gScore to -1 (unvisited) except start node:   (still will add it)
+    sw      $t6,                    gScore($t2)                             # Initialize gScore to 999 (unvisited) except start node:   (still will add it)
     sw      $t7,                    hScore($t2)                             # Initialize hScore to 0 (or any other value)
     sw      $t8,                    fScore($t2)                             # Initialize fScore to 2 (or any other value)
     sw      $s0,                    parent_x($t2)                           # Initialize parent_x to 0 (or any other value)
     sw      $s1,                    parent_y($t2)                           # Initialize parent_y to 0 (or any other value)
 
+    # Generate parent index
+    sll     $t9,                    $s1,                16                  # parent_y << 16
+    or      $t9,                    $t9,                $s0                 # (parent_y << 16) | parent_x
     # Push to open set
     move    $a0,                    $s3                                     # x
     move    $a1,                    $s4                                     # y
@@ -208,10 +225,7 @@ next_neighbor:
 a_star_exit:
     # Restore return address and preserved registers
     lw      $ra,                    0($sp)
-    lw      $s0,                    4($sp)
-    lw      $s1,                    8($sp)
-    lw      $s2,                    12($sp)
-    addi    $sp,                    $sp,                16
+    addi    $sp,                    $sp,                4
     jr      $ra
 
 
@@ -268,6 +282,9 @@ no_path_found:
 
 path_found:
     # Print "Path found" message
+    jal     print_node_grid
+
+
     jal     printSolution
     la      $a0,                    mesg_path_found
     li      $v0,                    4                                       # Print string syscall

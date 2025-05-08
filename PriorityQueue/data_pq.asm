@@ -1,9 +1,9 @@
 .data
     # # Priority Queue DS
     # (each node: 16 bytes = 4B x + 4B y + 4B parent + 4B fScore)
-heap:           .space  1600                                # 100-node heap
+heap:           .word  0:1600                                # 100-node heap
 heapSize:       .word   0                                   # Current Number of nodes in the heap
-heap_capacity:  .word   100                                 # Maximum number of nodes in the heap = 1200 / 12
+heap_capacity:  .word   500                                 # Maximum number of nodes in the heap = 1200 / 12
 extracted_node: .space  16                                  # 4B x + 4B y + 4B parent + 4B fScore
     # Messages
 msg_heap_full:  .asciiz "Heap is full. Cannot insert.\n"
