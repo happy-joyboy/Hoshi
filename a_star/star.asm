@@ -36,7 +36,7 @@ a_star:
     lw      $a2,                    goal_x
     lw      $a3,                    goal_y
 
-    jal     manhattan_heuristic
+    jal     euclidean_heuristic
     move    $a2,                    $v0                                     # h_score
     jal     set_f_score
     move    $t1,                    $v0                                     # h_score
@@ -112,12 +112,12 @@ not_goal:
 
 process_neighbors_loop:
     # Check if we've processed all directions
-    li      $t1,                    4                                       # 4 directions
+    li      $t1,                    8                                       # 4 directions
     beq     $s5,                    $t1,                a_star_loop
 
     # Calculate neighbor coordinates
-    la      $t2,                    d4x
-    la      $t3,                    d4y
+    la      $t2,                    d8x
+    la      $t3,                    d8y
     sll     $t4,                    $s5,                2                   # direction * 4
     add     $t2,                    $t2,                $t4
     add     $t3,                    $t3,                $t4
@@ -176,7 +176,7 @@ process_neighbors_loop:
     lw      $a2,                    goal_x
     lw      $a3,                    goal_y
 
-    jal     manhattan_heuristic
+    jal     euclidean_heuristic
     move    $t7,                    $v0                                     # h_score
 
     # Calculate f_score = g_score + h_score
