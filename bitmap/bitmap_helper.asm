@@ -1,48 +1,16 @@
-.data
-    .eqv    displayWidth, 16                                            # Width of the display in units 512 / 32 = 16
-    .eqv    displayHeight, 16                                           # Height of the display in units 512 / 32 = 16
-    .eqv    gridCellWidth, 2                                            # Size of the display in bytes
-    .eqv    gridCellHeight, 2                                           # Size of the display in bytes
-    .eqv    gridWidth, 8
-    .eqv    gridHeight, 8
-    .eqv    bitmapBaseAddress, 0x10040000
-
-grid:
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   0, 1, 0, 1, 0, 1, 0, 0                                      # Row 1
-    .word   0, 0, 0, 0, 0, 0, 0, 0                                      # Row 0
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   0, 0, 1, 0, 0, 1, 0, 1                                      # Row 4
-    .word   0, 1, 0, 0, 0, 1, 0, 0                                      # Row 2
-    .word   1, 0, 1, 0, 0, 0, 1, 0                                      # Row 3
-colorTable:
-    .word   0xFAF9F6 # White (background)  0
-    .word   0x000000 # Black (background)  1
-    .word   0x00ff00 # Green               2
-    .word   0xff0000 # Red                 3
-    .word   0xffffff # White               4
-    .word   0xFFFF00 # Yellow              5
-    .word   0x0000FF # Blue               6
-    .word   0xFF00FF # Magenta            7
-    .word   0x00FFFF # Cyan              8
-    .word   0x808080 # Gray               9
-    .word   0xFFA500 # Orange            10
-    .word   0x800080 # Purple           11
-    .word   0xA52A2A # Brown            12
-
 
 .text
-    .globl  clearScreen, drawPixel, drawGridNode, drawGrid
-# main:
-#     jal     clearScreen
-#     la      $a0,                grid
-#     li      $a1,                0
-#     li      $a2,                1
-#     jal     drawGrid
-# exitProgram:
-#     li      $v0,                10
-#     syscall
+    .globl  bitmapMain, clearScreen, drawPixel, drawGridNode, drawGrid
+bitmapMain:
+    jal     clearScreen
+    la      $a0,                map_data
+    li      $a1,                0
+    li      $a2,                1
+    jal     drawGrid
+exitProgram:
+    li      $v0,                10
+    syscall
+
 
 clearScreen:
     li      $t0,                bitmapBaseAddress
@@ -51,16 +19,11 @@ clearScreen:
     sll     $t1,                $t1,                2
     add     $t1,                $t1,                bitmapBaseAddress
     li      $t2,                0x808080                                # Black color
+
 clearLoop:
     sw      $t2,                0($t0)
     addi    $t0,                $t0,                4
     blt     $t0,                $t1,                clearLoop
-    
-    #delay
-    li $a0, 20        # 100 milliseconds delay
-    li $v0, 32         # syscall for sleep
-    syscall
-
     jr      $ra
     # $a0 = base address , $a1 = free space     , $a2 = wall color
 drawGrid:
@@ -82,11 +45,11 @@ inner_loop:
     sw      $ra,                0($sp)
     jal     drawGridNode
 
-        #delay
+
+    #delay
     li $a0, 10        # 100 milliseconds delay
     li $v0, 32         # syscall for sleep
     syscall
-
     addi    $s1,                $s1,                1
     j       inner_loop
 outer_loop_next:
@@ -115,20 +78,24 @@ drawGridNode:
     addi    $t7,                $t5,                gridCellWidth
     addi    $t8,                $t6,                gridCellHeight
 
+
 row_loop_bitmap:
     bge     $t6,                $t8,                finish
     move    $t5,                $s7
 col_loop_bitmap:
     bge     $t5,                $t7,                next_row_bitmap
+
     move    $a0,                $t5
     move    $a1,                $t6
     jal     drawPixel
     addi    $t5,                $t5,                1
+
     j       col_loop_bitmap
 
 next_row_bitmap:
     addi    $t6,                $t6,                1
     j       row_loop_bitmap
+
 
 finish:
     lw      $ra,                0($sp)
