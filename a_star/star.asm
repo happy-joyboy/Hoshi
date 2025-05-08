@@ -36,7 +36,7 @@ a_star:
     lw      $a2,                    goal_x
     lw      $a3,                    goal_y
 
-    jal     euclidean_heuristic
+    jal     chebyshevDistance
     move    $a2,                    $v0                                     # h_score
     jal     set_f_score
     move    $t1,                    $v0                                     # h_score
@@ -176,7 +176,7 @@ process_neighbors_loop:
     lw      $a2,                    goal_x
     lw      $a3,                    goal_y
 
-    jal     euclidean_heuristic
+    jal     chebyshevDistance
     move    $t7,                    $v0                                     # h_score
 
     # Calculate f_score = g_score + h_score
@@ -323,3 +323,4 @@ add_to_closed_set:
     .include    "..\PriorityQueue\pq.asm"
     .include    "..\\node\\node_list.asm"
     .include    "..\func_calc\h_calc.asm"
+    .include    "..\func_calc\\new.asm"

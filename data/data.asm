@@ -126,6 +126,7 @@ colorTable:
     start_y:            .word   0
     goal_x:             .word   31
     goal_y:             .word   31
+    # start_x:            .word   0
 
     nodes:              .word   0:9216                                                                                          # 64 nodes × 32 bytes
     closed_set:         .word   0:1024                                                                                          # 1 node × 32 bytes
