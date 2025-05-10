@@ -1,8 +1,11 @@
-# A* Pathfinding Algorithm Implementation in MIPS Assembly
-
-## Overview
-
-This document provides a comprehensive explanation of a MIPS assembly implementation of the A* pathfinding algorithm. The implementation includes visualization components to display the algorithm's progress in real-time, making it suitable for educational purposes and algorithm visualization.
+# 🌟 MIPS A* Pathfinding Algorithm Implementation
+<div align="center">
+  <img src="https://img.shields.io/badge/Language-MIPS%20Assembly-blue" alt="Language">
+  <img src="https://img.shields.io/badge/Algorithm-A*%20Pathfinding-green" alt="Algorithm">
+  <img src="https://img.shields.io/badge/Visualization-Bitmap%20Display-orange" alt="Visualization">
+</div>
+📝 Overview
+This project is a comprehensive implementation of the A* pathfinding algorithm in MIPS assembly language. A* is one of the most efficient pathfinding algorithms that finds the shortest path between two points while avoiding obstacles. This implementation includes a visual representation using the MIPS bitmap display, showing the algorithm's step-by-step progress and the final path.
 
 A* (pronounced "A-star") is a popular pathfinding algorithm used in computer science and artificial intelligence. It combines the advantages of Dijkstra's algorithm (which guarantees the shortest path) and greedy best-first search (which uses heuristics to improve performance). A* is widely used in applications such as video games, robotics, and navigation systems.
 
@@ -92,67 +95,73 @@ The A* algorithm is implemented in the `a_star` function, which follows these st
    - Visualizes the final path on the grid
 
 ## Helper Functions
+Function Documentation
+Core A* Functions
 
-### `is_valid_position`
-Checks if a given position is valid by verifying:
-- The position is within the grid boundaries
-- The position is not an obstacle
+   **a_star**:
 
-### `is_in_closed_set`
-Checks if a node is in the closed set (already evaluated)
+      - The main A* algorithm implementation. Initializes structures, runs the search loop, and handles path reconstruction.
 
-### `add_to_closed_set`
-Adds a node to the closed set
+   **is_valid_position**
 
-### `manhattan_heuristic` (referenced but defined in an included file)
-Calculates the Manhattan distance between two points, which serves as the heuristic for the A* algorithm
+      - Parameters: a0 = x, a1 = y
+      - Returns: v0 = 1 if valid, 0 if invalid
+      - Description: Checks if a position is within map boundaries and not an obstacle.
 
-### Visualization Functions
+   **is_in_closed_set**
 
-The code includes visualization functions to display the algorithm's progress:
+      - Parameters: a0 = x, a1 = y
+      - Returns: v0 = 1 if in closed set, 0 otherwise
+      - Description: Determines if a node has already been fully evaluated.
 
-- `drawGrid`: Renders the initial grid
-- `drawGridNode`: Highlights a specific node with a color
-- `clearScreen`: Clears the display
+   **add_to_closed_set**
 
-These functions allow for real-time visualization of:
-- The explored nodes (yellow)
-- The frontier nodes (gray)
-- The final path (green)
-- The start and goal positions
+      - Parameters: a0 = x, a1 = y
+      - Description: Marks a node as fully evaluated.
 
-## Implementation Details
+   **chebyshevDistance**
 
-### Priority Queue
+      - Parameters: a0 = x1, a1 = y1, a2 = x2, a3 = y2
+      - Returns: Chebyshev distance between two points
+      - Description: Heuristic function for the A* algorithm.
 
-The open set is implemented as a priority queue (heap) with operations:
-- `push`: Adds a node to the open set
-- `pop`: Removes and returns the node with the lowest f-score
+   ### Priority Queue Functions
+   
+   **push**
 
-These operations are defined in the included file `node_list.asm`.
+      - Parameters: a0 = x, a1 = y, a2 = parent, a3 = f-score
+      - Description: Adds a node to the priority queue.
 
-### Path Reconstruction
+   **pop**
 
-When the goal is found, the algorithm traces back from the goal to the start using the parent pointers stored in each node. This path is then visualized on the grid.
+      - Description: Extracts the node with the lowest f-score.
+      - Side Effect: Places the extracted node in the extracted_node structure.
 
-### Delays
+   ### Node Management Functions
+   
+   **initialize_nodes**
 
-The code includes strategic delays to make the visualization comprehensible:
-```assembly
-li $a0, 100        # 100 milliseconds delay
-li $v0, 32         # syscall for sleep
-syscall
-```
+      - Description: Sets up initial node values for all grid positions.
 
-These delays slow down the algorithm to allow human observation of the search process.
+   **set_g_score, get_g_score, set_f_score, get_f_score**
+
+      - Description: Accessor/mutator functions for node scores.
+
+   **drawGridNode**
+
+      - Parameters: a0 = x, a1 = y, a2 = status
+      - Description: Updates the visual representation of nodes during algorithm execution.
+
+   **printSolution**
+
+      - Description: Reconstructs and displays the final path.
+
 
 ## Performance Considerations
 
-1. **Heuristic Choice**: The Manhattan distance heuristic is used, which is admissible for 4-way movement but can be less effective for 8-way movement.
-
-2. **Open Set Implementation**: The open set is implemented as a priority queue, which allows for efficient selection of the lowest f-score node.
-
-3. **Closed Set Implementation**: The closed set is implemented as a direct-access array, allowing for O(1) lookups.
+- The use of a priority queue ensures optimal performance for node selection
+- Closed set implementation prevents redundant node evaluation
+- Visualization features may slow execution but enhance understanding
 
 ## Visualization Color Scheme
 
@@ -166,9 +175,11 @@ The code uses a consistent color scheme for visualization:
 ## Included Files
 
 The implementation references several included files:
-- `node_list.asm`: Contains priority queue operations
-- `h_calc.asm`: Contains heuristic calculation functions
-- `bitmap_helper.asm`: Contains visualization functions
+- **Priority Queue** (`pq.asm`): Implementation of a min-heap for the open set
+- **Node Management** (`node_list.asm`): Functions for manipulating node data structures
+- **Heuristic Functions** (`h_calc.asm`): Distance calculation functions
+- **Support Functions** (`new.asm`): Additional helper functions
+
 
 ## Conclusion
 
