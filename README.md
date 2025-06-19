@@ -66,13 +66,19 @@ The bitmap display provides real-time visualization of:
 - 🟣 Goal position
 - 🔴 Final path
 
+
+## TO run 
+1. Download git repo
+2. you will need mars mips emulator
+3. open star.asm in a_star folder and run it
+
 ## 🎮 Demo
 
 > [!NOTE]
 > Place your demo video link here. A visual demonstration helps viewers understand the algorithm's execution.
 
 ```
-[Watch the Hoshi A* Algorithm in Action](your-video-link-here)
+[Watch the Hoshi A* Algorithm in Action](https://youtu.be/Cvr2Xt19EN4)
 ```
 
 ## 📊 Performance Analysis
@@ -89,21 +95,6 @@ The implementation demonstrates efficient pathfinding in constrained memory envi
 - **Bitmap Display**: Direct memory manipulation for visualization
 - **Complex Algorithm Translation**: Converting high-level algorithm concepts to assembly instructions
 
-## 🛠️ Project Structure
-
-```
-.
-├── .data               # Data segment with grid definition, nodes, and heap structures
-│   ├── grid            # Map representation (0=walkable, 1=obstacle)
-│   ├── nodes           # Node storage for A* algorithm
-│   └── heap            # Priority queue implementation
-│
-├── .text               # Code segment
-│   ├── main            # Program entry point
-│   ├── a_star          # Core A* algorithm implementation
-│   ├── visualization   # Bitmap display functions
-│   └── helper          # Utility functions (heuristics, queue operations)
-```
 
 ## 🌟 Contributors
 
@@ -123,8 +114,8 @@ Special thanks to everyone who contributed to this project:
 
 ## 🔮 Future Improvements
 
-- [ ] Support for larger grid sizes
-- [ ] Additional heuristic functions (Euclidean, Chebyshev, etc.)
+- [X] Support for larger grid sizes
+- [X] Additional heuristic functions (Euclidean, Chebyshev, etc.)
 - [ ] Dynamic obstacle placement
 - [ ] Performance optimizations
 - [ ] Interactive user controls

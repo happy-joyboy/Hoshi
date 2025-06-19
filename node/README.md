@@ -1,8 +1,4 @@
-# 🗺️ MIPS A* Pathfinding Algorithm Implementation - Detailed Analysis
-
-## 📝 Core Algorithm Overview
-
-The provided code implements the A* pathfinding algorithm in MIPS assembly language. A* is an informed search algorithm that uses a heuristic function to guide its search toward the goal, making it more efficient than simpler algorithms like BFS or Dijkstra's.
+# 🗺️ MIPS Node List Implementation - Detailed Analysis
 
 ## 🏗️ Data Structures
 
@@ -248,29 +244,6 @@ sw      $s6, 0($sp)       # Save registers
 sw      $s7, 4($sp)
 ```
 
-## 🔄 A* Algorithm Flow
-
-While not shown in the provided snippet, the complete A* algorithm would follow these steps:
-
-1. **Initialization**:
-   - Set start node gScore to 0
-   - Calculate start node hScore and fScore
-   - Add start node to open set
-
-2. **Main Loop**:
-   - Select node with lowest fScore from open set
-   - If goal node, reconstruct path
-   - Otherwise, explore neighbors:
-     - Calculate tentative gScore
-     - If better than current gScore, update node
-     - Set node parent for path reconstruction
-     - Update fScore and add to open set if needed
-
-3. **Path Reconstruction**:
-   - Start from goal node
-   - Follow parent pointers back to start
-   - Reverse path to get start-to-goal order
-
 ## 📊 Visualization Components
 
 The code uses a helper function `drawGridNode` (imported from bitmap_helper.asm) to visualize:
@@ -307,35 +280,3 @@ print_node_grid:
 2. **Memory Access**: Calculates addresses efficiently to minimize memory accesses
 3. **Code Structure**: Uses jump instructions to avoid redundant condition checks
 4. **Data Organization**: Organizes node data for efficient access patterns
-
-## 🚀 Performance Considerations
-
-The A* algorithm's performance depends on:
-1. **Heuristic Quality**: Better heuristics guide the search more efficiently
-2. **Data Structure Efficiency**: For a full implementation, priority queue operations are critical
-3. **Grid Size**: Performance scales with the number of nodes explored
-4. **Obstacle Density**: More complex maps require exploring more nodes
-
-## 📈 Possible Enhancements
-
-1. Implement a more efficient priority queue for the open set
-2. Add diagonal movement support
-3. Implement weighted edges for varied terrain costs
-4. Add path smoothing for more natural paths
-5. Optimize memory usage for larger maps
-
-## 🔗 Integration with Other Systems
-
-This A* implementation could be integrated with:
-- Game AI for NPC movement
-- Robot navigation systems
-- Traffic simulation
-- Network routing
-
-## 🧠 Advanced A* Variants
-
-The basic implementation could be extended to support:
-- **Theta***: Smoothes paths by allowing line-of-sight movements
-- **Jump Point Search**: Optimized A* for uniform-cost grid maps
-- **Bidirectional A***: Searches from both start and goal simultaneously
-- **Hierarchical A***: Uses abstractions for large-scale pathfinding
