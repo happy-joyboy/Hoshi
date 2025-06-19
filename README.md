@@ -74,12 +74,7 @@ The bitmap display provides real-time visualization of:
 
 ## 🎮 Demo
 
-> [!NOTE]
-> Place your demo video link here. A visual demonstration helps viewers understand the algorithm's execution.
-
-```
-[Watch the Hoshi A* Algorithm in Action](https://youtu.be/Cvr2Xt19EN4)
-```
+> [Watch the Hoshi A* Algorithm in Action](https://youtu.be/Cvr2Xt19EN4)
 
 ## 📊 Performance Analysis
 
