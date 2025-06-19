@@ -90,15 +90,21 @@ The implementation demonstrates efficient pathfinding in constrained memory envi
 - **Bitmap Display**: Direct memory manipulation for visualization
 - **Complex Algorithm Translation**: Converting high-level algorithm concepts to assembly instructions
 
-
 ## 🌟 Contributors
 
 Special thanks to everyone who contributed to this project:
 
-- **Saeed Khalid** (Joyboy)
-- **Ahmed Walid**
-- **Ahmed Khaled**
-- **Hazem Ahmed**
+- **Saeed Khalid** (Joyboy)  
+  [LinkedIn](https://www.linkedin.com/in/saeed-khalid-958795259/) | [GitHub](https://github.com/happy-joyboy)
+
+- **Ahmed Walid**  
+  [LinkedIn](https://www.linkedin.com/in/ahmedwaleed3604/) | [GitHub](https://github.com/AhmedWaleed36)
+
+- **Ahmed Khaled**  
+  [LinkedIn](https://www.linkedin.com/in/ahmedkhaled-l/) | [GitHub](https://github.com/Ahmed-Khaled-L)
+
+- **Hazem Ahmed**  
+  [LinkedIn](https://www.linkedin.com/in/hazem-ahmad-0387312a6/) | [GitHub](https://github.com/hazemahmed283)
 
 ## 📚 Lessons Learned
 
